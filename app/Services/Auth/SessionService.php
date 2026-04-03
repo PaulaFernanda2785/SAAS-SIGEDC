@@ -18,7 +18,7 @@ final class SessionService
     ) {
     }
 
-    public function open(array $user, array $profiles, Request $request): array
+    public function open(array $user, array $profiles, Request $request, array $contractContext = []): array
     {
         session_regenerate_id(true);
 
@@ -53,6 +53,9 @@ final class SessionService
             'perfis' => $profiles,
             'perfil_primario' => $primaryProfile,
             'area' => $area,
+            'assinatura_id' => $contractContext['assinatura_id'] ?? null,
+            'status_assinatura' => $contractContext['status_assinatura'] ?? null,
+            'modulos_liberados' => $contractContext['modulos_liberados'] ?? [],
             'sessao_usuario_id' => $sessionRecordId,
             'ultimo_toque' => time(),
         ];
@@ -106,4 +109,3 @@ final class SessionService
         return 'operational';
     }
 }
-

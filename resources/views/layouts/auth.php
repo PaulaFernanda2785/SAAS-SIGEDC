@@ -17,6 +17,11 @@ $flash = Flash::all();
 </head>
 <body class="auth-page">
 <main class="auth-wrapper">
+    <p class="muted center">
+        <a href="<?= e(url('/')) ?>">Inicio</a> |
+        <a href="<?= e(url('/planos')) ?>">Planos</a> |
+        <a href="<?= e(url('/demonstracao')) ?>">Demonstracao</a>
+    </p>
     <?php if (isset($flash['error'])): ?>
         <div class="alert alert-error"><?= e((string) $flash['error']) ?></div>
     <?php endif; ?>
@@ -31,4 +36,3 @@ $flash = Flash::all();
 <script src="<?= e(url('/assets/js/shared/form-guard.js')) ?>" defer></script>
 </body>
 </html>
-

@@ -14,6 +14,7 @@ final class AuthService
     public function __construct(
         private readonly ?UserRepository $userRepository = null,
         private readonly ?SessionService $sessionService = null,
+        private readonly ?ContractAccessService $contractAccessService = null,
         private readonly ?AuditService $auditService = null,
         private readonly ?AccessLogRepository $accessLogRepository = null
     ) {
@@ -23,6 +24,7 @@ final class AuthService
     {
         $userRepository = $this->userRepository ?? new UserRepository();
         $sessionService = $this->sessionService ?? new SessionService();
+        $contractAccessService = $this->contractAccessService ?? new ContractAccessService();
         $auditService = $this->auditService ?? new AuditService();
         $accessLogRepository = $this->accessLogRepository ?? new AccessLogRepository();
 
@@ -69,12 +71,67 @@ final class AuthService
             return ['ok' => false, 'message' => 'Usuario inativo ou bloqueado.'];
         }
 
+        if ((string) ($user['status_conta'] ?? '') !== 'ATIVA') {
+            $accessLogRepository->record([
+                'usuario_id' => (int) $user['id'],
+                'conta_id' => (int) $user['conta_id'],
+                'orgao_id' => (int) $user['orgao_id'],
+                'evento' => 'LOGIN_BLOCKED',
+                'resultado' => 'FALHA',
+                'motivo' => 'conta_inativa_ou_bloqueada',
+                'ip_address' => $request->ipAddress(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return ['ok' => false, 'message' => 'Conta contratante inativa ou bloqueada.'];
+        }
+
+        if ((string) ($user['status_orgao'] ?? '') !== 'ATIVO') {
+            $accessLogRepository->record([
+                'usuario_id' => (int) $user['id'],
+                'conta_id' => (int) $user['conta_id'],
+                'orgao_id' => (int) $user['orgao_id'],
+                'evento' => 'LOGIN_BLOCKED',
+                'resultado' => 'FALHA',
+                'motivo' => 'orgao_inativo_ou_bloqueado',
+                'ip_address' => $request->ipAddress(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return ['ok' => false, 'message' => 'Orgao inativo ou bloqueado.'];
+        }
+
+        $contractCheck = $contractAccessService->evaluate((int) $user['conta_id']);
+        if (!($contractCheck['ok'] ?? false)) {
+            $accessLogRepository->record([
+                'usuario_id' => (int) $user['id'],
+                'conta_id' => (int) $user['conta_id'],
+                'orgao_id' => (int) $user['orgao_id'],
+                'evento' => 'LOGIN_BLOCKED',
+                'resultado' => 'FALHA',
+                'motivo' => (string) ($contractCheck['reason'] ?? 'contrato_invalido'),
+                'ip_address' => $request->ipAddress(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return ['ok' => false, 'message' => (string) ($contractCheck['message'] ?? 'Acesso indisponivel para a assinatura atual.')];
+        }
+
         $profiles = $userRepository->profileCodes((int) $user['id']);
         if ($profiles === []) {
             return ['ok' => false, 'message' => 'Usuario sem perfil vinculado.'];
         }
 
-        $session = $sessionService->open($user, $profiles, $request);
+        $session = $sessionService->open(
+            $user,
+            $profiles,
+            $request,
+            [
+                'assinatura_id' => isset($contractCheck['assinatura']['id']) ? (int) $contractCheck['assinatura']['id'] : null,
+                'status_assinatura' => $contractCheck['assinatura']['status_assinatura'] ?? null,
+                'modulos_liberados' => $contractCheck['modulos_liberados'] ?? [],
+            ]
+        );
 
         $accessLogRepository->record([
             'usuario_id' => (int) $user['id'],
@@ -153,4 +210,3 @@ final class AuthService
         return is_array($auth) ? $auth : null;
     }
 }
-

@@ -13,6 +13,7 @@ declare(strict_types=1);
         <p><strong>Nome:</strong> <?= e((string) ($auth['nome_completo'] ?? '')) ?></p>
         <p><strong>Email:</strong> <?= e((string) ($auth['email_login'] ?? '')) ?></p>
         <p><strong>Perfil:</strong> <?= e((string) ($auth['perfil_primario'] ?? '')) ?></p>
+        <p><strong>Assinatura:</strong> <?= e((string) ($auth['status_assinatura'] ?? 'N/A')) ?></p>
     </article>
     <article class="card">
         <h2>Separacao estrutural</h2>
@@ -20,7 +21,7 @@ declare(strict_types=1);
             <li>Area operacional isolada da area administrativa.</li>
             <li>Controle por middleware de area.</li>
             <li>Trilha de acesso e auditoria registradas.</li>
+            <li>Contexto contratual validado no login.</li>
         </ul>
     </article>
 </section>
-

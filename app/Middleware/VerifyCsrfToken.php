@@ -17,9 +17,9 @@ final class VerifyCsrfToken implements MiddlewareInterface
             return $next($request);
         }
 
-        $redirectPath = '/login';
-        if (isset($_SESSION['auth']['area'])) {
-            $redirectPath = $_SESSION['auth']['area'] === 'admin' ? '/admin' : '/operational';
+        $redirectPath = $request->uri();
+        if ($redirectPath === '/logout') {
+            $redirectPath = '/login';
         }
 
         $csrfKey = (string) $request->input('_csrf_key', 'default');

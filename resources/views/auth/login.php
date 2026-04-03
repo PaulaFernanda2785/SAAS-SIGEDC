@@ -31,5 +31,9 @@ $errors = $errors ?? [];
             <span class="button-loading" hidden>Processando...</span>
         </button>
     </form>
-</section>
 
+    <p class="muted">
+        Esqueceu a senha?
+        <a href="<?= e(url('/forgot-password')) ?>">Recuperar acesso</a>
+    </p>
+</section>

@@ -21,6 +21,8 @@ $flash = Flash::all();
         <strong><?= e(config('app.name', 'SIGERD')) ?></strong>
         <nav>
             <a href="<?= e(url('/')) ?>">Inicio</a>
+            <a href="<?= e(url('/planos')) ?>">Planos</a>
+            <a href="<?= e(url('/demonstracao')) ?>">Demonstracao</a>
             <a href="<?= e(url('/login')) ?>">Login</a>
         </nav>
     </div>
@@ -39,4 +41,3 @@ $flash = Flash::all();
 </main>
 </body>
 </html>
-

@@ -3,25 +3,25 @@
 declare(strict_types=1);
 ?>
 <section class="hero">
-    <h1>Fundacao Tecnica do SIGERD</h1>
-    <p>Ambiente inicial pronto para bootstrap, seguranca, roteamento e evolucao por fases.</p>
+    <h1>SIGERD - Nucleo SaaS e identidade institucional</h1>
+    <p>Plataforma para gestao institucional de riscos e desastres com controle de contas, orgaos, usuarios e assinaturas.</p>
     <div class="actions">
-        <a class="button" href="<?= e(url('/login')) ?>">Entrar no Sistema</a>
+        <a class="button" href="<?= e(url('/demonstracao')) ?>">Solicitar demonstracao</a>
+        <a class="button button-secondary" href="<?= e(url('/planos')) ?>">Ver planos</a>
     </div>
 </section>
 
 <section class="grid">
     <article class="card">
-        <h2>Area Publica</h2>
-        <p>Separada da administracao e da operacao institucional desde a fase 0.</p>
+        <h2>Identidade institucional</h2>
+        <p>Cadastre conta contratante, orgaos, unidades e perfis com separacao de contexto desde o inicio.</p>
     </article>
     <article class="card">
-        <h2>Autenticacao</h2>
-        <p>Login, sessao e auditoria minima com rastreabilidade em banco.</p>
+        <h2>Nucleo SaaS</h2>
+        <p>Gestao de planos, assinaturas e liberacao de modulos com bloqueio contratual basico no acesso.</p>
     </article>
     <article class="card">
-        <h2>Base Arquitetural</h2>
-        <p>Controllers, services, repositories, middlewares e schema central prontos.</p>
+        <h2>Seguranca e rastreabilidade</h2>
+        <p>Login com trilha de acesso, auditoria funcional e recuperacao de senha por token.</p>
     </article>
 </section>
-

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 $title = $title ?? 'Area Operacional';
 $auth = $_SESSION['auth'] ?? [];
+$flash = App\Support\Flash::all();
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -28,9 +29,17 @@ $auth = $_SESSION['auth'] ?? [];
     </div>
 </header>
 <main class="container">
+    <?php if (isset($flash['success'])): ?>
+        <div class="alert alert-success"><?= e((string) $flash['success']) ?></div>
+    <?php endif; ?>
+    <?php if (isset($flash['error'])): ?>
+        <div class="alert alert-error"><?= e((string) $flash['error']) ?></div>
+    <?php endif; ?>
+    <?php if (isset($flash['warning'])): ?>
+        <div class="alert alert-warning"><?= e((string) $flash['warning']) ?></div>
+    <?php endif; ?>
     <?= $content ?? '' ?>
 </main>
 <script src="<?= e(url('/assets/js/shared/form-guard.js')) ?>" defer></script>
 </body>
 </html>
-
