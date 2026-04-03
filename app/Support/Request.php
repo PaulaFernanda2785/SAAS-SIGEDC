@@ -75,8 +75,11 @@ final class Request
 
     private static function normalizeUri(string $uri): string
     {
-        $basePath = rtrim((string) config('app.base_path', ''), '/');
-        if ($basePath !== '' && str_starts_with($uri, $basePath)) {
+        $basePath = \app_base_path();
+        if (
+            $basePath !== ''
+            && ($uri === $basePath || str_starts_with($uri, $basePath . '/'))
+        ) {
             $uri = substr($uri, strlen($basePath));
         }
 
@@ -88,4 +91,3 @@ final class Request
         return $normalized === '' ? '/' : $normalized;
     }
 }
-

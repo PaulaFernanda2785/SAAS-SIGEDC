@@ -58,6 +58,18 @@ if (!function_exists('config')) {
     }
 }
 
+if (!function_exists('app_base_path')) {
+    function app_base_path(): string
+    {
+        $configured = trim((string) config('app.base_path', ''));
+        if ($configured === '' || $configured === '/') {
+            return '';
+        }
+
+        return '/' . trim($configured, '/');
+    }
+}
+
 if (!function_exists('url')) {
     function url(string $path = '/'): string
     {
@@ -65,11 +77,15 @@ if (!function_exists('url')) {
             return $path;
         }
 
-        $basePath = rtrim((string) config('app.base_path', ''), '/');
+        $basePath = app_base_path();
         $normalized = '/' . ltrim($path, '/');
         $normalized = $normalized === '//' ? '/' : $normalized;
 
-        return $basePath . ($normalized === '/' ? '' : $normalized);
+        if ($normalized === '/') {
+            return $basePath !== '' ? $basePath : '/';
+        }
+
+        return $basePath . $normalized;
     }
 }
 
@@ -79,4 +95,3 @@ if (!function_exists('e')) {
         return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     }
 }
-
