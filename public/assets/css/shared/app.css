@@ -1,0 +1,187 @@
+:root {
+    --bg: #f3f5f7;
+    --surface: #ffffff;
+    --text: #102a43;
+    --muted: #486581;
+    --primary: #0b7285;
+    --primary-dark: #095c6b;
+    --success: #2b8a3e;
+    --warning: #e67700;
+    --danger: #c92a2a;
+    --border: #d9e2ec;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
+}
+
+.container {
+    width: min(1080px, 92vw);
+    margin: 0 auto;
+}
+
+.topbar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+}
+
+.topbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    gap: 1rem;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+nav a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+main {
+    padding: 2rem 0;
+}
+
+.hero {
+    margin-bottom: 1.5rem;
+}
+
+.hero h1 {
+    margin: 0 0 0.5rem;
+}
+
+.hero p {
+    margin: 0;
+    color: var(--muted);
+}
+
+.grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.card h2 {
+    margin-top: 0;
+}
+
+.button,
+button {
+    appearance: none;
+    border: 0;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.65rem 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.button:hover,
+button:hover {
+    background: var(--primary-dark);
+}
+
+button[disabled] {
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.field {
+    display: grid;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+label {
+    font-weight: 600;
+}
+
+input {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 0.75rem;
+}
+
+.inline-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.auth-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+}
+
+.auth-wrapper {
+    width: min(430px, 92vw);
+}
+
+.auth-card {
+    margin-top: 0.75rem;
+}
+
+.alert {
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    margin-bottom: 0.9rem;
+    font-weight: 600;
+}
+
+.alert-success {
+    background: #ebfbee;
+    color: var(--success);
+    border: 1px solid #b2f2bb;
+}
+
+.alert-warning {
+    background: #fff4e6;
+    color: var(--warning);
+    border: 1px solid #ffd8a8;
+}
+
+.alert-error {
+    background: #fff5f5;
+    color: var(--danger);
+    border: 1px solid #ffc9c9;
+}
+
+.error {
+    color: var(--danger);
+}
+
+@media (max-width: 700px) {
+    .topbar .container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
