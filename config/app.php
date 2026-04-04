@@ -13,7 +13,7 @@ return [
         'authenticate' => App\Middleware\Authenticate::class,
         'area.admin' => App\Middleware\CheckAdminArea::class,
         'area.operational' => App\Middleware\CheckOperationalArea::class,
+        'operational.access' => App\Middleware\CheckOperationalAccess::class,
         'csrf' => App\Middleware\VerifyCsrfToken::class,
     ],
 ];
-

@@ -1,16 +1,19 @@
-# SIGERD - Fase 1 (Nucleo SaaS e Identidade Institucional)
+# SIGERD - Fase 2 (Nucleo operacional minimo viavel)
 
-Esta entrega evolui a fundacao tecnica da Fase 0 para uma base SaaS institucional funcional, com:
+Esta entrega adiciona a Fase 2 sobre a fundacao das fases anteriores:
 
 - area publica inicial (landing, planos e demonstracao);
 - autenticacao com recuperacao de senha por token;
 - cadastro institucional (contas, orgaos, unidades, usuarios e perfis);
-- vinculo usuario-perfil;
-- catalogo de planos;
-- criacao de assinaturas;
-- liberacao de modulos por assinatura;
-- controle basico de status contratual no login;
-- painel administrativo inicial com resumo SaaS.
+- catalogo de planos, assinaturas e modulos;
+- controle contratual no login e trilha de auditoria;
+- painel operacional com indicadores;
+- abertura e listagem de incidentes;
+- briefing inicial do incidente;
+- comando inicial do incidente;
+- periodos operacionais;
+- registros operacionais (diario);
+- relatorio operacional basico por escopo institucional.
 
 ## Requisitos
 
@@ -35,6 +38,7 @@ copy .env.example .env
 ```sql
 source database/schema/001_phase0_foundation.sql;
 source database/schema/002_phase1_saas_core.sql;
+source database/schema/003_phase2_operational_core.sql;
 ```
 
 5. Execute os seeds:
@@ -42,6 +46,7 @@ source database/schema/002_phase1_saas_core.sql;
 ```sql
 source database/seeds/001_phase0_seed.sql;
 source database/seeds/002_phase1_seed.sql;
+source database/seeds/003_phase2_seed.sql;
 ```
 
 6. Opcional: gere autoload do Composer:
@@ -53,6 +58,11 @@ composer dump-autoload
 ## Usuario inicial
 
 - Login: `admin@sigerd.local`
+- Senha: `Admin@123`
+
+## Usuario operacional de teste
+
+- Login: `operador@sigerd.local`
 - Senha: `Admin@123`
 
 ## Entrada web
@@ -91,8 +101,15 @@ Configure o Apache para apontar para `public/` e acesse:
 ## Rotas operacionais
 
 - `GET /operational`
+- `GET /operational/incidentes`
+- `POST /operational/incidentes`
+- `POST /operational/incidentes/briefing`
+- `POST /operational/incidentes/comando`
+- `POST /operational/incidentes/periodos`
+- `POST /operational/incidentes/registros`
+- `GET /operational/relatorios/basico`
 
-## Observacoes da Fase 1
+## Observacoes da Fase 2
 
 - O login agora valida:
   - `status_usuario = ATIVO`
@@ -100,4 +117,10 @@ Configure o Apache para apontar para `public/` e acesse:
   - `status_orgao = ATIVO`
   - existencia de assinatura ativa/trial valida para a conta
   - modulo `AUTH` liberado na assinatura
+- As rotas operacionais validam:
+  - area operacional;
+  - modulo contratado `OPERATIONAL`;
+  - perfil operacional permitido;
+  - escopo institucional (conta/orgao/unidade) em consultas sensiveis.
+- O backend bloqueia duplo POST com token processado recentemente (5s) e frontend com `form-guard`.
 - Em ambiente nao-producao, o fluxo de recuperacao de senha exibe token de teste via flash message.

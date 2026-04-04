@@ -52,6 +52,10 @@ nav a {
     font-weight: 600;
 }
 
+nav a.is-active {
+    color: #0f5132;
+}
+
 main {
     padding: 2rem 0;
 }
@@ -95,6 +99,12 @@ main {
 
 .card h2 {
     margin-top: 0;
+}
+
+.kpi-card .kpi-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0.25rem 0 0;
 }
 
 .button,
@@ -210,6 +220,16 @@ textarea {
 
 .muted {
     color: var(--muted);
+}
+
+.tag {
+    display: inline-flex;
+    border-radius: 999px;
+    background: #e6f4ea;
+    color: #1f5132;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
 }
 
 .center {

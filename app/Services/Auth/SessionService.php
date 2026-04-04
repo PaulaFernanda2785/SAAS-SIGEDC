@@ -56,6 +56,7 @@ final class SessionService
             'assinatura_id' => $contractContext['assinatura_id'] ?? null,
             'status_assinatura' => $contractContext['status_assinatura'] ?? null,
             'modulos_liberados' => $contractContext['modulos_liberados'] ?? [],
+            'escopos' => $contractContext['escopos'] ?? ['PROPRIO_ORGAO'],
             'sessao_usuario_id' => $sessionRecordId,
             'ultimo_toque' => time(),
         ];

@@ -122,6 +122,8 @@ final class AuthService
             return ['ok' => false, 'message' => 'Usuario sem perfil vinculado.'];
         }
 
+        $scopes = $userRepository->scopeCodes((int) $user['id']);
+
         $session = $sessionService->open(
             $user,
             $profiles,
@@ -130,6 +132,7 @@ final class AuthService
                 'assinatura_id' => isset($contractCheck['assinatura']['id']) ? (int) $contractCheck['assinatura']['id'] : null,
                 'status_assinatura' => $contractCheck['assinatura']['status_assinatura'] ?? null,
                 'modulos_liberados' => $contractCheck['modulos_liberados'] ?? [],
+                'escopos' => $scopes,
             ]
         );
 

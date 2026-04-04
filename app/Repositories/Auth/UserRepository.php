@@ -62,6 +62,27 @@ final class UserRepository
         return array_map(static fn(array $row): string => (string) $row['nome_perfil'], $rows);
     }
 
+    public function scopeCodes(int $userId): array
+    {
+        if (!$this->tableExists('usuarios_escopos')) {
+            return ['PROPRIO_ORGAO'];
+        }
+
+        $sql = 'SELECT ue.escopo_acesso
+                FROM usuarios_escopos ue
+                WHERE ue.usuario_id = :usuario_id
+                  AND ue.status_escopo = \'ATIVO\'
+                ORDER BY ue.id ASC';
+
+        $statement = $this->pdo()->prepare($sql);
+        $statement->execute(['usuario_id' => $userId]);
+        $rows = $statement->fetchAll();
+
+        $scopes = array_map(static fn(array $row): string => (string) $row['escopo_acesso'], $rows);
+
+        return $scopes !== [] ? $scopes : ['PROPRIO_ORGAO'];
+    }
+
     public function touchLastAccess(int $userId): void
     {
         $statement = $this->pdo()->prepare(
@@ -81,6 +102,19 @@ final class UserRepository
             'password_hash' => $passwordHash,
             'id' => $userId,
         ]);
+    }
+
+    private function tableExists(string $tableName): bool
+    {
+        $statement = $this->pdo()->prepare(
+            'SELECT COUNT(*)
+             FROM information_schema.tables
+             WHERE table_schema = DATABASE()
+               AND table_name = :table_name'
+        );
+        $statement->execute(['table_name' => $tableName]);
+
+        return ((int) $statement->fetchColumn()) > 0;
     }
 
     private function pdo(): PDO

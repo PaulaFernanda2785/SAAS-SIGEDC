@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 $title = $title ?? 'Area Operacional';
 $auth = $_SESSION['auth'] ?? [];
+$scopeList = is_array($auth['escopos'] ?? null) ? $auth['escopos'] : [];
+$scopeLabel = $scopeList !== [] ? implode(', ', $scopeList) : 'PROPRIO_ORGAO';
+$currentUri = (string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
 $flash = App\Support\Flash::all();
 ?>
 <!doctype html>
@@ -20,7 +23,10 @@ $flash = App\Support\Flash::all();
         <strong>Operacional Institucional</strong>
         <nav>
             <span><?= e((string) ($auth['nome_completo'] ?? '')) ?></span>
-            <a href="<?= e(url('/operational')) ?>">Dashboard</a>
+            <span class="muted">Escopo: <?= e($scopeLabel) ?></span>
+            <a class="<?= str_starts_with($currentUri, '/operational/incidentes') ? 'is-active' : '' ?>" href="<?= e(url('/operational/incidentes')) ?>">Incidentes</a>
+            <a class="<?= str_starts_with($currentUri, '/operational/relatorios') ? 'is-active' : '' ?>" href="<?= e(url('/operational/relatorios/basico')) ?>">Relatorios</a>
+            <a class="<?= $currentUri === '/operational' ? 'is-active' : '' ?>" href="<?= e(url('/operational')) ?>">Dashboard</a>
             <form method="post" action="<?= e(url('/logout')) ?>" class="inline-form">
                 <?= App\Support\Csrf::field('auth_logout') ?>
                 <button type="submit">Sair</button>
