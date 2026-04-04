@@ -1,6 +1,6 @@
-# SIGERD - Fase 2 (Nucleo operacional minimo viavel)
+# SIGERD - Fase 3 (Expansao do PLANCON e do gerenciamento de desastres)
 
-Esta entrega adiciona a Fase 2 sobre a fundacao das fases anteriores:
+Esta entrega adiciona a Fase 3 sobre a fundacao das fases anteriores:
 
 - area publica inicial (landing, planos e demonstracao);
 - autenticacao com recuperacao de senha por token;
@@ -14,6 +14,8 @@ Esta entrega adiciona a Fase 2 sobre a fundacao das fases anteriores:
 - periodos operacionais;
 - registros operacionais (diario);
 - relatorio operacional basico por escopo institucional.
+- modulo PLANCON com blocos de risco, cenario, ativacao, recursos e revisao.
+- modulo de expansao de desastres com PAI, operacoes, planejamento, seguranca e desmobilizacao.
 
 ## Requisitos
 
@@ -39,6 +41,7 @@ copy .env.example .env
 source database/schema/001_phase0_foundation.sql;
 source database/schema/002_phase1_saas_core.sql;
 source database/schema/003_phase2_operational_core.sql;
+source database/schema/004_phase3_plancon_disaster_expansion.sql;
 ```
 
 5. Execute os seeds:
@@ -47,6 +50,7 @@ source database/schema/003_phase2_operational_core.sql;
 source database/seeds/001_phase0_seed.sql;
 source database/seeds/002_phase1_seed.sql;
 source database/seeds/003_phase2_seed.sql;
+source database/seeds/004_phase3_seed.sql;
 ```
 
 6. Opcional: gere autoload do Composer:
@@ -107,9 +111,22 @@ Configure o Apache para apontar para `public/` e acesse:
 - `POST /operational/incidentes/comando`
 - `POST /operational/incidentes/periodos`
 - `POST /operational/incidentes/registros`
+- `GET /operational/plancon`
+- `POST /operational/plancon`
+- `POST /operational/plancon/riscos`
+- `POST /operational/plancon/cenarios`
+- `POST /operational/plancon/ativacao`
+- `POST /operational/plancon/recursos`
+- `POST /operational/plancon/revisoes`
+- `GET /operational/desastres`
+- `POST /operational/desastres/pai`
+- `POST /operational/desastres/operacoes`
+- `POST /operational/desastres/planejamento`
+- `POST /operational/desastres/seguranca`
+- `POST /operational/desastres/desmobilizacao`
 - `GET /operational/relatorios/basico`
 
-## Observacoes da Fase 2
+## Observacoes da Fase 3
 
 - O login agora valida:
   - `status_usuario = ATIVO`
@@ -120,6 +137,7 @@ Configure o Apache para apontar para `public/` e acesse:
 - As rotas operacionais validam:
   - area operacional;
   - modulo contratado `OPERATIONAL`;
+  - modulo contratado especifico para `PLANCON` e `DISASTER_EXPANSION`;
   - perfil operacional permitido;
   - escopo institucional (conta/orgao/unidade) em consultas sensiveis.
 - O backend bloqueia duplo POST com token processado recentemente (5s) e frontend com `form-guard`.

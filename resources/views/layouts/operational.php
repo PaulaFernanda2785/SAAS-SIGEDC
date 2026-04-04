@@ -25,6 +25,8 @@ $flash = App\Support\Flash::all();
             <span><?= e((string) ($auth['nome_completo'] ?? '')) ?></span>
             <span class="muted">Escopo: <?= e($scopeLabel) ?></span>
             <a class="<?= str_starts_with($currentUri, '/operational/incidentes') ? 'is-active' : '' ?>" href="<?= e(url('/operational/incidentes')) ?>">Incidentes</a>
+            <a class="<?= str_starts_with($currentUri, '/operational/plancon') ? 'is-active' : '' ?>" href="<?= e(url('/operational/plancon')) ?>">PLANCON</a>
+            <a class="<?= str_starts_with($currentUri, '/operational/desastres') ? 'is-active' : '' ?>" href="<?= e(url('/operational/desastres')) ?>">Desastres</a>
             <a class="<?= str_starts_with($currentUri, '/operational/relatorios') ? 'is-active' : '' ?>" href="<?= e(url('/operational/relatorios/basico')) ?>">Relatorios</a>
             <a class="<?= $currentUri === '/operational' ? 'is-active' : '' ?>" href="<?= e(url('/operational')) ?>">Dashboard</a>
             <form method="post" action="<?= e(url('/logout')) ?>" class="inline-form">

@@ -14,6 +14,8 @@ return [
         'area.admin' => App\Middleware\CheckAdminArea::class,
         'area.operational' => App\Middleware\CheckOperationalArea::class,
         'operational.access' => App\Middleware\CheckOperationalAccess::class,
+        'plancon.access' => App\Middleware\CheckPlanconAccess::class,
+        'disaster.access' => App\Middleware\CheckDisasterExpansionAccess::class,
         'csrf' => App\Middleware\VerifyCsrfToken::class,
     ],
 ];

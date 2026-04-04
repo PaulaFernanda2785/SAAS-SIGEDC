@@ -49,6 +49,8 @@ $scope = $scope ?? [];
         </ul>
         <div class="actions">
             <a class="button" href="<?= e(url('/operational/incidentes')) ?>">Operar incidentes</a>
+            <a class="button" href="<?= e(url('/operational/plancon')) ?>">Abrir PLANCON</a>
+            <a class="button" href="<?= e(url('/operational/desastres')) ?>">Gerir desastres</a>
             <a class="button button-secondary" href="<?= e(url('/operational/relatorios/basico')) ?>">Ver relatorios</a>
         </div>
     </article>
