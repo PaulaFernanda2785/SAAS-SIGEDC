@@ -9,10 +9,38 @@ $usuarios = $usuarios ?? [];
 $perfis = $perfis ?? [];
 $vinculos = $vinculos ?? [];
 $options = $options ?? [];
+$currentUfFilter = $currentUfFilter ?? null;
+$canSelectAllUf = $canSelectAllUf ?? false;
 ?>
 <section class="hero">
     <h1>Gestao Institucional</h1>
-    <p>Cadastro de contas, orgaos, unidades, usuarios, perfis e vinculos usuario-perfil.</p>
+    <p>Cadastro de contas, orgaos, unidades, usuarios, perfis e vinculos usuario-perfil com padronizacao territorial por UF.</p>
+</section>
+
+<section class="card">
+    <h2>Filtro territorial</h2>
+    <form method="get" action="<?= e(url('/admin/institucional')) ?>">
+        <div class="field">
+            <label for="filtro_uf">UF</label>
+            <select
+                id="filtro_uf"
+                name="uf"
+                <?= $canSelectAllUf ? 'data-uf-dynamic="true" data-uf-include-empty="true" data-uf-empty-label="Todos" data-uf-selected="' . e((string) $currentUfFilter) . '"' : 'disabled' ?>
+            >
+                <option value="">Todos</option>
+                <?php foreach (($options['ufs'] ?? []) as $uf): ?>
+                    <?php $sigla = (string) $uf['sigla']; ?>
+                    <option value="<?= e($sigla) ?>" <?= $sigla === (string) $currentUfFilter ? 'selected' : '' ?>>
+                        <?= e($sigla) ?> - <?= e((string) $uf['nome']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <?php if (!$canSelectAllUf && $currentUfFilter !== null): ?>
+                <input type="hidden" name="uf" value="<?= e((string) $currentUfFilter) ?>">
+            <?php endif; ?>
+        </div>
+        <button type="submit">Aplicar filtro</button>
+    </form>
 </section>
 
 <section class="grid grid-2">
@@ -31,6 +59,31 @@ $options = $options ?? [];
             <div class="field">
                 <label for="conta_cpf_cnpj">CPF/CNPJ</label>
                 <input id="conta_cpf_cnpj" name="cpf_cnpj" type="text">
+            </div>
+            <div class="field">
+                <label for="conta_uf_sigla">UF de origem</label>
+                <?php if ($canSelectAllUf): ?>
+                    <select
+                        id="conta_uf_sigla"
+                        name="uf_sigla"
+                        required
+                        data-uf-dynamic="true"
+                        data-uf-include-empty="true"
+                        data-uf-empty-label="Selecione"
+                        data-uf-selected="<?= e((string) $currentUfFilter) ?>"
+                    >
+                        <option value="">Selecione</option>
+                        <?php foreach (($options['ufs'] ?? []) as $uf): ?>
+                            <?php $sigla = (string) $uf['sigla']; ?>
+                            <option value="<?= e($sigla) ?>" <?= $sigla === (string) $currentUfFilter ? 'selected' : '' ?>>
+                                <?= e($sigla) ?> - <?= e((string) $uf['nome']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php else: ?>
+                    <input type="text" value="<?= e((string) ($currentUfFilter ?? '')) ?>" readonly>
+                    <input type="hidden" name="uf_sigla" value="<?= e((string) ($currentUfFilter ?? '')) ?>">
+                <?php endif; ?>
             </div>
             <div class="field">
                 <label for="conta_email_principal">Email principal</label>
@@ -58,7 +111,7 @@ $options = $options ?? [];
                     <option value="">Selecione</option>
                     <?php foreach (($options['contas'] ?? []) as $conta): ?>
                         <option value="<?= e((string) $conta['id']) ?>">
-                            <?= e((string) $conta['nome_fantasia']) ?> (<?= e((string) $conta['status_cadastral']) ?>)
+                            <?= e((string) $conta['nome_fantasia']) ?> - <?= e((string) ($conta['uf_sigla'] ?? '')) ?> (<?= e((string) $conta['status_cadastral']) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -97,7 +150,7 @@ $options = $options ?? [];
                     <option value="">Selecione</option>
                     <?php foreach (($options['orgaos'] ?? []) as $orgao): ?>
                         <option value="<?= e((string) $orgao['id']) ?>">
-                            <?= e((string) $orgao['nome_oficial']) ?> (<?= e((string) $orgao['status_orgao']) ?>)
+                            <?= e((string) $orgao['nome_oficial']) ?> - <?= e((string) ($orgao['uf_sigla'] ?? '')) ?> (<?= e((string) $orgao['status_orgao']) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -134,7 +187,7 @@ $options = $options ?? [];
                 <select id="usuario_conta_id" name="conta_id" required>
                     <option value="">Selecione</option>
                     <?php foreach (($options['contas'] ?? []) as $conta): ?>
-                        <option value="<?= e((string) $conta['id']) ?>"><?= e((string) $conta['nome_fantasia']) ?></option>
+                        <option value="<?= e((string) $conta['id']) ?>"><?= e((string) $conta['nome_fantasia']) ?> - <?= e((string) ($conta['uf_sigla'] ?? '')) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -143,7 +196,7 @@ $options = $options ?? [];
                 <select id="usuario_orgao_id" name="orgao_id" required>
                     <option value="">Selecione</option>
                     <?php foreach (($options['orgaos'] ?? []) as $orgao): ?>
-                        <option value="<?= e((string) $orgao['id']) ?>"><?= e((string) $orgao['nome_oficial']) ?></option>
+                        <option value="<?= e((string) $orgao['id']) ?>"><?= e((string) $orgao['nome_oficial']) ?> - <?= e((string) ($orgao['uf_sigla'] ?? '')) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -152,7 +205,7 @@ $options = $options ?? [];
                 <select id="usuario_unidade_id" name="unidade_id">
                     <option value="">Sem unidade</option>
                     <?php foreach (($options['unidades'] ?? []) as $unidade): ?>
-                        <option value="<?= e((string) $unidade['id']) ?>"><?= e((string) $unidade['nome_unidade']) ?></option>
+                        <option value="<?= e((string) $unidade['id']) ?>"><?= e((string) $unidade['nome_unidade']) ?> - <?= e((string) ($unidade['uf_sigla'] ?? '')) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -253,6 +306,7 @@ $options = $options ?? [];
             <tr>
                 <th>ID</th>
                 <th>Nome</th>
+                <th>UF</th>
                 <th>Status</th>
                 <th>Email</th>
             </tr>
@@ -262,6 +316,7 @@ $options = $options ?? [];
                 <tr>
                     <td><?= e((string) $row['id']) ?></td>
                     <td><?= e((string) $row['nome_fantasia']) ?></td>
+                    <td><?= e((string) ($row['uf_sigla'] ?? '')) ?></td>
                     <td><?= e((string) $row['status_cadastral']) ?></td>
                     <td><?= e((string) ($row['email_principal'] ?? '')) ?></td>
                 </tr>
@@ -280,6 +335,7 @@ $options = $options ?? [];
                 <th>Orgao ID</th>
                 <th>Conta</th>
                 <th>Orgao</th>
+                <th>UF</th>
                 <th>Status</th>
             </tr>
             </thead>
@@ -289,6 +345,7 @@ $options = $options ?? [];
                     <td><?= e((string) $row['id']) ?></td>
                     <td><?= e((string) $row['conta_nome']) ?></td>
                     <td><?= e((string) $row['nome_oficial']) ?></td>
+                    <td><?= e((string) ($row['uf_sigla'] ?? '')) ?></td>
                     <td><?= e((string) $row['status_orgao']) ?></td>
                 </tr>
             <?php endforeach; ?>
@@ -302,6 +359,7 @@ $options = $options ?? [];
                 <th>Unidade ID</th>
                 <th>Orgao</th>
                 <th>Nome</th>
+                <th>UF</th>
                 <th>Status</th>
             </tr>
             </thead>
@@ -311,6 +369,7 @@ $options = $options ?? [];
                     <td><?= e((string) $row['id']) ?></td>
                     <td><?= e((string) $row['orgao_nome']) ?></td>
                     <td><?= e((string) $row['nome_unidade']) ?></td>
+                    <td><?= e((string) ($row['uf_sigla'] ?? '')) ?></td>
                     <td><?= e((string) $row['status_unidade']) ?></td>
                 </tr>
             <?php endforeach; ?>
@@ -330,6 +389,7 @@ $options = $options ?? [];
                 <th>Login</th>
                 <th>Conta</th>
                 <th>Orgao</th>
+                <th>UF</th>
                 <th>Status</th>
             </tr>
             </thead>
@@ -341,6 +401,7 @@ $options = $options ?? [];
                     <td><?= e((string) $row['email_login']) ?></td>
                     <td><?= e((string) $row['conta_nome']) ?></td>
                     <td><?= e((string) $row['orgao_nome']) ?></td>
+                    <td><?= e((string) ($row['uf_sigla'] ?? '')) ?></td>
                     <td><?= e((string) $row['status_usuario']) ?></td>
                 </tr>
             <?php endforeach; ?>

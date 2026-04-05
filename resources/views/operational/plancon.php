@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 $scope = $scope ?? [];
+$auth = $auth ?? [];
 $summary = $summary ?? [];
 $plancons = $plancons ?? [];
 $planconOptions = $planconOptions ?? [];
@@ -55,7 +56,13 @@ $recentResources = $recentResources ?? [];
             </div>
             <div class="field">
                 <label for="plancon_municipio_estado">Municipio/UF</label>
-                <input id="plancon_municipio_estado" name="municipio_estado" type="text">
+                <input
+                    id="plancon_municipio_estado"
+                    name="municipio_estado"
+                    type="text"
+                    data-municipio-autocomplete="true"
+                    data-uf="<?= e((string) ($auth['uf_sigla'] ?? '')) ?>"
+                >
             </div>
             <div class="field">
                 <label for="plancon_tipo_desastre_principal">Tipo principal</label>

@@ -20,6 +20,7 @@ $flash = App\Support\Flash::all();
         <strong>Admin SaaS</strong>
         <nav>
             <span><?= e((string) ($auth['nome_completo'] ?? '')) ?></span>
+            <span class="muted">UF: <?= e((string) ($auth['uf_sigla'] ?? 'N/A')) ?></span>
             <a href="<?= e(url('/admin')) ?>">Dashboard</a>
             <a href="<?= e(url('/admin/institucional')) ?>">Institucional</a>
             <a href="<?= e(url('/admin/comercial')) ?>">Comercial</a>
@@ -43,5 +44,7 @@ $flash = App\Support\Flash::all();
     <?= $content ?? '' ?>
 </main>
 <script src="<?= e(url('/assets/js/shared/form-guard.js')) ?>" defer></script>
+<script src="<?= e(url('/assets/js/shared/uf-dynamic.js')) ?>" defer></script>
+<script src="<?= e(url('/assets/js/shared/municipio-autocomplete.js')) ?>" defer></script>
 </body>
 </html>

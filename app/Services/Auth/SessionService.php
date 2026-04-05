@@ -48,6 +48,7 @@ final class SessionService
             'conta_id' => isset($user['conta_id']) ? (int) $user['conta_id'] : null,
             'orgao_id' => isset($user['orgao_id']) ? (int) $user['orgao_id'] : null,
             'unidade_id' => isset($user['unidade_id']) ? (int) $user['unidade_id'] : null,
+            'uf_sigla' => isset($user['uf_sigla']) ? strtoupper((string) $user['uf_sigla']) : null,
             'nome_completo' => (string) $user['nome_completo'],
             'email_login' => (string) $user['email_login'],
             'perfis' => $profiles,

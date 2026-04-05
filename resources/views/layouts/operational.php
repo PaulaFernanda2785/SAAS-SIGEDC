@@ -49,5 +49,7 @@ $flash = App\Support\Flash::all();
     <?= $content ?? '' ?>
 </main>
 <script src="<?= e(url('/assets/js/shared/form-guard.js')) ?>" defer></script>
+<script src="<?= e(url('/assets/js/shared/uf-dynamic.js')) ?>" defer></script>
+<script src="<?= e(url('/assets/js/shared/municipio-autocomplete.js')) ?>" defer></script>
 </body>
 </html>

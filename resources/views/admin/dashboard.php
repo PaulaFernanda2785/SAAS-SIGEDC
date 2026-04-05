@@ -13,6 +13,7 @@ declare(strict_types=1);
         <p><strong>Nome:</strong> <?= e((string) ($auth['nome_completo'] ?? '')) ?></p>
         <p><strong>Email:</strong> <?= e((string) ($auth['email_login'] ?? '')) ?></p>
         <p><strong>Perfil:</strong> <?= e((string) ($auth['perfil_primario'] ?? '')) ?></p>
+        <p><strong>UF de contexto:</strong> <?= e((string) ($auth['uf_sigla'] ?? 'N/A')) ?></p>
         <p><strong>Status assinatura:</strong> <?= e((string) ($auth['status_assinatura'] ?? 'N/A')) ?></p>
     </article>
     <article class="card">

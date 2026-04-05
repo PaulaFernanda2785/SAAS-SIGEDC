@@ -15,8 +15,8 @@ final class UserRepository
 
     public function findByLogin(string $login): ?array
     {
-        $sql = 'SELECT u.id, u.conta_id, u.orgao_id, u.unidade_id, u.nome_completo, u.email_login, u.password_hash, u.status_usuario,
-                       c.status_cadastral AS status_conta, o.status_orgao
+        $sql = 'SELECT u.id, u.conta_id, u.orgao_id, u.unidade_id, u.uf_sigla, u.nome_completo, u.email_login, u.password_hash, u.status_usuario,
+                       c.status_cadastral AS status_conta, c.uf_sigla AS conta_uf_sigla, o.status_orgao, o.uf_sigla AS orgao_uf_sigla
                 FROM usuarios u
                 INNER JOIN contas c ON c.id = u.conta_id
                 INNER JOIN orgaos o ON o.id = u.orgao_id
@@ -32,8 +32,8 @@ final class UserRepository
 
     public function findById(int $userId): ?array
     {
-        $sql = 'SELECT u.id, u.conta_id, u.orgao_id, u.unidade_id, u.nome_completo, u.email_login, u.status_usuario,
-                       c.status_cadastral AS status_conta, o.status_orgao
+        $sql = 'SELECT u.id, u.conta_id, u.orgao_id, u.unidade_id, u.uf_sigla, u.nome_completo, u.email_login, u.status_usuario,
+                       c.status_cadastral AS status_conta, c.uf_sigla AS conta_uf_sigla, o.status_orgao, o.uf_sigla AS orgao_uf_sigla
                 FROM usuarios u
                 INNER JOIN contas c ON c.id = u.conta_id
                 INNER JOIN orgaos o ON o.id = u.orgao_id

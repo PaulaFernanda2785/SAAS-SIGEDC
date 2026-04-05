@@ -42,6 +42,7 @@ source database/schema/001_phase0_foundation.sql;
 source database/schema/002_phase1_saas_core.sql;
 source database/schema/003_phase2_operational_core.sql;
 source database/schema/004_phase3_plancon_disaster_expansion.sql;
+source database/schema/005_phase3_uf_territorios.sql;
 ```
 
 5. Execute os seeds:
@@ -51,12 +52,31 @@ source database/seeds/001_phase0_seed.sql;
 source database/seeds/002_phase1_seed.sql;
 source database/seeds/003_phase2_seed.sql;
 source database/seeds/004_phase3_seed.sql;
+source database/seeds/005_phase3_uf_seed.sql;
 ```
 
 6. Opcional: gere autoload do Composer:
 
 ```bash
 composer dump-autoload
+```
+
+7. Importe os municipios/UFs a partir dos CSVs da pasta `territorios`:
+
+```bash
+php scripts/import_territorios_csv.php
+```
+
+Importacao focada por UF (exemplo AM):
+
+```bash
+php scripts/import_territorios_csv.php --uf=AM
+```
+
+8. Execute os testes de integracao de contexto UF:
+
+```bash
+php tests/integration/uf_context_integration_test.php
 ```
 
 ## Usuario inicial
@@ -142,3 +162,21 @@ Configure o Apache para apontar para `public/` e acesse:
   - escopo institucional (conta/orgao/unidade) em consultas sensiveis.
 - O backend bloqueia duplo POST com token processado recentemente (5s) e frontend com `form-guard`.
 - Em ambiente nao-producao, o fluxo de recuperacao de senha exibe token de teste via flash message.
+- A camada administrativa agora padroniza UF de origem em:
+  - `contas`, `orgaos`, `unidades`, `usuarios` e `assinaturas`.
+- `ADMIN_MASTER` pode consultar todos os UFs; os demais perfis administrativos operam apenas no UF de contexto.
+- A referencia territorial usa `territorios_ufs` e `territorios_municipios`, com carga executavel via CSV.
+- Endpoint de autocomplete territorial:
+  - `GET /api/territorios/ufs`
+  - `GET /api/territorios/municipios?uf=TO&q=pal`
+  - protegido por autenticacao e escopo UF.
+  - cache backend por `UF+prefixo` em `storage/cache/territory` para reduzir carga de consulta.
+
+## CI (GitHub Actions)
+
+- Workflow: `.github/workflows/php.yml`
+- Disparo automatico: a cada `push` e `pull_request`
+- Pipeline:
+  - sobe MySQL 8.4
+  - aplica `database/schema/*.sql` e `database/seeds/*.sql`
+  - executa `php tests/integration/uf_context_integration_test.php`

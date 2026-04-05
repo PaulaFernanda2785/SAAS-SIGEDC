@@ -23,6 +23,17 @@ final class Response
         return new self(View::render($view, $data, $layout), $status, ['Content-Type' => 'text/html; charset=UTF-8']);
     }
 
+    public static function json(array $payload, int $status = 200, array $headers = []): self
+    {
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($json === false) {
+            $json = '{"ok":false,"message":"Falha ao serializar resposta JSON."}';
+            $status = 500;
+        }
+
+        return new self($json, $status, array_merge(['Content-Type' => 'application/json; charset=UTF-8'], $headers));
+    }
+
     public static function redirect(string $path, int $status = 302): self
     {
         return new self('', $status, ['Location' => url($path)]);
@@ -38,4 +49,3 @@ final class Response
         echo $this->body;
     }
 }
-

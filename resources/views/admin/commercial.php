@@ -7,10 +7,39 @@ $assinaturas = $assinaturas ?? [];
 $modulos = $modulos ?? [];
 $modulosLiberados = $modulosLiberados ?? [];
 $contas = $contas ?? [];
+$options = $options ?? [];
+$currentUfFilter = $currentUfFilter ?? null;
+$canSelectAllUf = $canSelectAllUf ?? false;
 ?>
 <section class="hero">
     <h1>Gestao Comercial SaaS</h1>
-    <p>Catalogo de planos, assinaturas por conta e liberacao de modulos contratados.</p>
+    <p>Catalogo de planos, assinaturas por conta e liberacao de modulos contratados com padronizacao por UF.</p>
+</section>
+
+<section class="card">
+    <h2>Filtro territorial</h2>
+    <form method="get" action="<?= e(url('/admin/comercial')) ?>">
+        <div class="field">
+            <label for="filtro_comercial_uf">UF</label>
+            <select
+                id="filtro_comercial_uf"
+                name="uf"
+                <?= $canSelectAllUf ? 'data-uf-dynamic="true" data-uf-include-empty="true" data-uf-empty-label="Todos" data-uf-selected="' . e((string) $currentUfFilter) . '"' : 'disabled' ?>
+            >
+                <option value="">Todos</option>
+                <?php foreach (($options['ufs'] ?? []) as $uf): ?>
+                    <?php $sigla = (string) $uf['sigla']; ?>
+                    <option value="<?= e($sigla) ?>" <?= $sigla === (string) $currentUfFilter ? 'selected' : '' ?>>
+                        <?= e($sigla) ?> - <?= e((string) $uf['nome']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <?php if (!$canSelectAllUf && $currentUfFilter !== null): ?>
+                <input type="hidden" name="uf" value="<?= e((string) $currentUfFilter) ?>">
+            <?php endif; ?>
+        </div>
+        <button type="submit">Aplicar filtro</button>
+    </form>
 </section>
 
 <section class="grid grid-2">
@@ -59,7 +88,7 @@ $contas = $contas ?? [];
                     <option value="">Selecione</option>
                     <?php foreach ($contas as $conta): ?>
                         <option value="<?= e((string) $conta['id']) ?>">
-                            <?= e((string) $conta['nome_fantasia']) ?> (<?= e((string) $conta['status_cadastral']) ?>)
+                            <?= e((string) $conta['nome_fantasia']) ?> - <?= e((string) ($conta['uf_sigla'] ?? '')) ?> (<?= e((string) $conta['status_cadastral']) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -188,6 +217,7 @@ $contas = $contas ?? [];
             <tr>
                 <th>ID</th>
                 <th>Conta</th>
+                <th>UF</th>
                 <th>Plano</th>
                 <th>Status</th>
                 <th>Inicio</th>
@@ -199,6 +229,7 @@ $contas = $contas ?? [];
                 <tr>
                     <td><?= e((string) $assinatura['id']) ?></td>
                     <td><?= e((string) $assinatura['conta_nome']) ?></td>
+                    <td><?= e((string) ($assinatura['uf_sigla'] ?? '')) ?></td>
                     <td><?= e((string) $assinatura['nome_plano']) ?></td>
                     <td><?= e((string) $assinatura['status_assinatura']) ?></td>
                     <td><?= e((string) $assinatura['inicia_em']) ?></td>
@@ -217,6 +248,7 @@ $contas = $contas ?? [];
             <thead>
             <tr>
                 <th>Assinatura</th>
+                <th>UF</th>
                 <th>Modulo</th>
                 <th>Status</th>
                 <th>Atualizado em</th>
@@ -226,6 +258,7 @@ $contas = $contas ?? [];
             <?php foreach ($modulosLiberados as $row): ?>
                 <tr>
                     <td>#<?= e((string) $row['assinatura_id']) ?></td>
+                    <td><?= e((string) ($row['uf_sigla'] ?? '')) ?></td>
                     <td><?= e((string) $row['codigo_modulo']) ?> - <?= e((string) $row['nome_modulo']) ?></td>
                     <td><?= e((string) $row['status_liberacao']) ?></td>
                     <td><?= e((string) $row['updated_at']) ?></td>

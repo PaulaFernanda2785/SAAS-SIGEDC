@@ -57,18 +57,25 @@ final class CommercialRepository
         return (int) $this->pdo()->lastInsertId();
     }
 
-    public function assinaturas(): array
+    public function assinaturas(?string $ufSigla = null): array
     {
-        $statement = $this->pdo()->query(
-            'SELECT a.id, a.conta_id, c.nome_fantasia AS conta_nome,
+        $where = [];
+        $params = [];
+        $this->applyUfWhere('a', $ufSigla, $where, $params);
+        $whereSql = $this->whereClause($where);
+
+        $statement = $this->pdo()->prepare(
+            "SELECT a.id, a.conta_id, c.nome_fantasia AS conta_nome, a.uf_sigla,
                     a.plano_id, p.nome_plano, a.status_assinatura,
                     a.inicia_em, a.expira_em, a.trial_fim_em, a.motivo_status, a.created_at
              FROM assinaturas a
              INNER JOIN contas c ON c.id = a.conta_id
              INNER JOIN planos_catalogo p ON p.id = a.plano_id
+             {$whereSql}
              ORDER BY a.id DESC
-             LIMIT 180'
+             LIMIT 180"
         );
+        $statement->execute($params);
 
         return $statement->fetchAll();
     }
@@ -77,12 +84,13 @@ final class CommercialRepository
     {
         $statement = $this->pdo()->prepare(
             'INSERT INTO assinaturas
-                (conta_id, plano_id, status_assinatura, inicia_em, expira_em, trial_fim_em, motivo_status, created_at, updated_at)
+                (conta_id, uf_sigla, plano_id, status_assinatura, inicia_em, expira_em, trial_fim_em, motivo_status, created_at, updated_at)
              VALUES
-                (:conta_id, :plano_id, :status_assinatura, :inicia_em, :expira_em, :trial_fim_em, :motivo_status, NOW(), NOW())'
+                (:conta_id, :uf_sigla, :plano_id, :status_assinatura, :inicia_em, :expira_em, :trial_fim_em, :motivo_status, NOW(), NOW())'
         );
         $statement->execute([
             'conta_id' => $data['conta_id'],
+            'uf_sigla' => $data['uf_sigla'],
             'plano_id' => $data['plano_id'],
             'status_assinatura' => $data['status_assinatura'],
             'inicia_em' => $data['inicia_em'],
@@ -92,6 +100,20 @@ final class CommercialRepository
         ]);
 
         return (int) $this->pdo()->lastInsertId();
+    }
+
+    public function assinaturaById(int $assinaturaId): ?array
+    {
+        $statement = $this->pdo()->prepare(
+            'SELECT id, conta_id, uf_sigla, status_assinatura
+             FROM assinaturas
+             WHERE id = :id
+             LIMIT 1'
+        );
+        $statement->execute(['id' => $assinaturaId]);
+        $row = $statement->fetch();
+
+        return $row !== false ? $row : null;
     }
 
     public function modules(): array
@@ -125,15 +147,23 @@ final class CommercialRepository
         ]);
     }
 
-    public function modulosPorAssinatura(): array
+    public function modulosPorAssinatura(?string $ufSigla = null): array
     {
-        $statement = $this->pdo()->query(
-            'SELECT am.id, am.assinatura_id, am.modulo_id, m.codigo_modulo, m.nome_modulo, am.status_liberacao, am.updated_at
+        $where = [];
+        $params = [];
+        $this->applyUfWhere('a', $ufSigla, $where, $params);
+        $whereSql = $this->whereClause($where);
+
+        $statement = $this->pdo()->prepare(
+            "SELECT am.id, am.assinatura_id, a.uf_sigla, am.modulo_id, m.codigo_modulo, m.nome_modulo, am.status_liberacao, am.updated_at
              FROM assinaturas_modulos am
+             INNER JOIN assinaturas a ON a.id = am.assinatura_id
              INNER JOIN modulos m ON m.id = am.modulo_id
+             {$whereSql}
              ORDER BY am.id DESC
-             LIMIT 250'
+             LIMIT 250"
         );
+        $statement->execute($params);
 
         return $statement->fetchAll();
     }
@@ -162,7 +192,7 @@ final class CommercialRepository
         }
 
         $statement = $this->pdo()->prepare(
-            'SELECT a.id, a.status_assinatura, a.inicia_em, a.expira_em,
+            'SELECT a.id, a.uf_sigla, a.status_assinatura, a.inicia_em, a.expira_em,
                     SUM(CASE WHEN m.codigo_modulo = \'AUTH\' AND am.status_liberacao = \'ATIVA\' THEN 1 ELSE 0 END) AS auth_liberado
              FROM assinaturas a
              LEFT JOIN assinaturas_modulos am ON am.assinatura_id = a.id
@@ -199,6 +229,22 @@ final class CommercialRepository
         $rows = $statement->fetchAll();
 
         return array_map(static fn(array $row): string => (string) $row['codigo_modulo'], $rows);
+    }
+
+    private function applyUfWhere(string $alias, ?string $ufSigla, array &$where, array &$params): void
+    {
+        $uf = strtoupper(trim((string) $ufSigla));
+        if (strlen($uf) !== 2) {
+            return;
+        }
+
+        $where[] = "{$alias}.uf_sigla = :uf_sigla";
+        $params['uf_sigla'] = $uf;
+    }
+
+    private function whereClause(array $where): string
+    {
+        return $where === [] ? '' : 'WHERE ' . implode(' AND ', $where);
     }
 
     private function tableExists(string $tableName): bool

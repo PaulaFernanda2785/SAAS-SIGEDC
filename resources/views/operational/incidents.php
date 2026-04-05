@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 $scope = $scope ?? [];
+$auth = $auth ?? [];
 $incidents = $incidents ?? [];
 $incidentOptions = $incidentOptions ?? [];
 $periodOptions = $periodOptions ?? [];
@@ -70,7 +71,13 @@ $classificationOptions = $classificationOptions ?? [];
             <?php endif; ?>
             <div class="field">
                 <label for="inc_municipio">Municipio</label>
-                <input id="inc_municipio" name="municipio" type="text">
+                <input
+                    id="inc_municipio"
+                    name="municipio"
+                    type="text"
+                    data-municipio-autocomplete="true"
+                    data-uf="<?= e((string) ($auth['uf_sigla'] ?? '')) ?>"
+                >
             </div>
             <div class="field">
                 <label for="inc_local_detalhado">Local detalhado</label>

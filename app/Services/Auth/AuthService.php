@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Auth;
 
+use App\Domain\Enum\UserProfile;
 use App\Repositories\Audit\AccessLogRepository;
 use App\Repositories\Auth\UserRepository;
 use App\Services\Audit\AuditService;
@@ -120,6 +121,29 @@ final class AuthService
         $profiles = $userRepository->profileCodes((int) $user['id']);
         if ($profiles === []) {
             return ['ok' => false, 'message' => 'Usuario sem perfil vinculado.'];
+        }
+
+        $isAdminMaster = in_array(UserProfile::ADMIN_MASTER, $profiles, true);
+        $userUf = strtoupper(trim((string) ($user['uf_sigla'] ?? '')));
+        $contractUf = strtoupper(trim((string) ($contractCheck['assinatura']['uf_sigla'] ?? '')));
+        if (
+            !$isAdminMaster
+            && $userUf !== ''
+            && $contractUf !== ''
+            && $userUf !== $contractUf
+        ) {
+            $accessLogRepository->record([
+                'usuario_id' => (int) $user['id'],
+                'conta_id' => (int) $user['conta_id'],
+                'orgao_id' => (int) $user['orgao_id'],
+                'evento' => 'LOGIN_BLOCKED',
+                'resultado' => 'FALHA',
+                'motivo' => 'uf_usuario_divergente_da_assinatura',
+                'ip_address' => $request->ipAddress(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return ['ok' => false, 'message' => 'Usuario fora do UF de origem da assinatura contratada.'];
         }
 
         $scopes = $userRepository->scopeCodes((int) $user['id']);

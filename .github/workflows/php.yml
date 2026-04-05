@@ -1,39 +1,76 @@
-name: PHP Composer
+name: SIGERD Integration CI
 
 on:
   push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
 
 permissions:
   contents: read
 
 jobs:
-  build:
-
+  integration-tests:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: sigerd_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=20
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql
+          coverage: none
 
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
+      - name: Install MySQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-mysql-client
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      - name: Prepare .env for CI
+        run: |
+          cp .env.example .env
+          sed -i 's/^APP_ENV=.*/APP_ENV=testing/' .env
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+          sed -i 's|^APP_URL=.*|APP_URL=http://127.0.0.1|' .env
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^DB_PORT=.*/DB_PORT=3306/' .env
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=sigerd_ci/' .env
+          sed -i 's/^DB_USERNAME=.*/DB_USERNAME=root/' .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=root/' .env
 
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
+      - name: Wait for MySQL
+        run: |
+          for i in {1..60}; do
+            mysqladmin ping -h127.0.0.1 -uroot -proot --silent && exit 0
+            sleep 2
+          done
+          echo "MySQL nao ficou disponivel em tempo."
+          exit 1
 
-    # - name: Run test suite
-    #   run: composer run-script test
+      - name: Apply schema and seeds
+        run: |
+          for file in database/schema/*.sql; do
+            echo "Aplicando schema: $file"
+            mysql -h127.0.0.1 -uroot -proot sigerd_ci < "$file"
+          done
+          for file in database/seeds/*.sql; do
+            echo "Aplicando seed: $file"
+            mysql -h127.0.0.1 -uroot -proot sigerd_ci < "$file"
+          done
+
+      - name: Run integration test (UF context + API territorial)
+        run: php tests/integration/uf_context_integration_test.php
