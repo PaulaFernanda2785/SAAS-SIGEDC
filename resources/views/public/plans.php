@@ -8,15 +8,15 @@ $formatMoney = static fn(float $value): string => 'R$ ' . number_format($value, 
 <section class="container landing-section">
     <header class="landing-section-header">
         <span>Planos SIGERD de estreia</span>
-        <h2>Escolha o plano ideal para sua instituicao, no ciclo mensal ou anual</h2>
-        <p class="muted">No ciclo anual, o valor total recebe 15% de desconto sobre 12 mensalidades, reduzindo o custo medio por mes.</p>
+        <h2>Escolha o plano ideal para sua instituição, no ciclo mensal ou anual</h2>
+        <p class="muted">No ciclo anual, o valor total recebe 15% de desconto sobre 12 mensalidades, reduzindo o custo médio por mês.</p>
     </header>
 </section>
 
 <?php if ($plans === []): ?>
     <section class="container landing-section">
         <article class="card landing-card">
-            <h3>Catalogo ainda nao publicado</h3>
+            <h3>Catálogo ainda não publicado</h3>
             <p>Execute o schema e o seed da Fase 1 para habilitar os planos comerciais do SIGERD.</p>
         </article>
     </section>
@@ -56,18 +56,18 @@ $formatMoney = static fn(float $value): string => 'R$ ' . number_format($value, 
                     <p class="muted"><?= e((string) ($plan['descricao'] ?? '')) ?></p>
                     <p><strong>Indicado para:</strong> <?= e((string) ($catalog['audience'] ?? 'Uso institucional')) ?></p>
                     <p><strong>Plano:</strong> <?= e($planCode) ?></p>
-                    <p><strong>Usuarios incluidos:</strong> <?= e((string) (($plan['limite_usuarios'] ?? null) !== null ? $plan['limite_usuarios'] : 'Ilimitado')) ?></p>
+                    <p><strong>Usuários incluídos:</strong> <?= e((string) (($plan['limite_usuarios'] ?? null) !== null ? $plan['limite_usuarios'] : 'Ilimitado')) ?></p>
 
                     <div class="plan-pricing">
                         <?php if ($isLaunchPrice && $launchDiscountValue > 0): ?>
                             <p class="plan-launch-note">
-                                Oferta de lancamento: de <?= e($formatMoney($monthlyOriginalValue)) ?>/mes por
-                                <?= e($formatMoney($monthlyValue)) ?>/mes.
+                                Oferta de lançamento: de <?= e($formatMoney($monthlyOriginalValue)) ?>/mês por
+                                <?= e($formatMoney($monthlyValue)) ?>/mês.
                             </p>
                         <?php endif; ?>
                         <div class="plan-pricing-line">
-                            <span>Ciclo mensal (renovacao mes a mes)</span>
-                            <strong><?= e($formatMoney($monthlyValue)) ?>/mes</strong>
+                            <span>Ciclo mensal (renovação mês a mês)</span>
+                            <strong><?= e($formatMoney($monthlyValue)) ?>/mês</strong>
                         </div>
                         <div class="plan-pricing-line plan-pricing-line--annual">
                             <span>Ciclo anual (<?= e(number_format($annualDiscountPercent, 0, ',', '.')) ?>% de desconto)</span>
@@ -76,7 +76,7 @@ $formatMoney = static fn(float $value): string => 'R$ ' . number_format($value, 
                         <p class="plan-pricing-caption">
                             Valor anual sem desconto: <?= e($formatMoney($annualGross)) ?>.<br>
                             Economia no anual: <?= e($formatMoney($annualDiscountValue)) ?>.<br>
-                            Equivalente mensal no anual: <?= e($formatMoney($annualMonthlyEquivalent)) ?>/mes.
+                            Equivalente mensal no anual: <?= e($formatMoney($annualMonthlyEquivalent)) ?>/mês.
                         </p>
                     </div>
 

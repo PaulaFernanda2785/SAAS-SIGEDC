@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Support\Flash;
 
-$title = $title ?? 'Autenticacao';
+$title = $title ?? 'Autenticação';
 $flash = Flash::all();
 $appVersion = (string) config('app.version', '1.0.0');
 
@@ -41,7 +41,7 @@ $authWrapperClass = 'container auth-wrapper' . ($isLoginAccessPage ? ' auth-wrap
 <header class="public-header">
     <div class="container container-wide public-header-inner">
         <div class="public-brand-zone">
-            <a class="public-brand" href="<?= e(url('/')) ?>" aria-label="Sistema Integrado de Gerenciamento de Riscos e Desastres - Inicio">
+            <a class="public-brand" href="<?= e(url('/')) ?>" aria-label="Sistema Integrado de Gerenciamento de Riscos e Desastres - Início">
                 <img src="<?= e(url('/assets/img/logo-SIGERD-02.png')) ?>" alt="Logo do sistema" class="public-brand-logo">
                 <span class="public-brand-text">
                     <strong>Sistema Integrado de Gerenciamento de Riscos e Desastres</strong>
@@ -66,15 +66,15 @@ $authWrapperClass = 'container auth-wrapper' . ($isLoginAccessPage ? ' auth-wrap
         </div>
 
         <nav id="auth-main-nav" class="public-nav" aria-label="Menu principal" data-nav-track>
-            <a class="<?= $isHome ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>">Inicio</a>
-            <a href="<?= e(url('/#solucao')) ?>">Solucao</a>
+            <a class="<?= $isHome ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>">Início</a>
+            <a href="<?= e(url('/#solucao')) ?>">Solução</a>
             <a href="<?= e(url('/#funcionalidades')) ?>">Funcionalidades</a>
             <a class="<?= $isPlans ? 'is-active' : '' ?>" href="<?= e(url('/planos')) ?>">Planos</a>
             <a class="<?= e($authAccessNavClass) ?>" href="<?= e(url('/acessar-plataforma')) ?>">Acessar plataforma</a>
         </nav>
 
         <div class="public-head-actions">
-            <span class="app-version">versao <?= e($appVersion) ?></span>
+            <span class="app-version">versão <?= e($appVersion) ?></span>
             <a class="public-cta" href="<?= e(url('/acessar-plataforma')) ?>">Acessar plataforma</a>
         </div>
     </div>
@@ -101,19 +101,19 @@ $authWrapperClass = 'container auth-wrapper' . ($isLoginAccessPage ? ' auth-wrap
             <img src="<?= e(url('/assets/img/logo-SIGERD-02.png')) ?>" alt="Logo do sistema" class="public-footer-logo">
             <div class="public-footer-copy">
                 <strong>Sistema Integrado de Gerenciamento de Riscos e Desastres</strong>
-                <p>Ambiente seguro de autenticacao institucional.</p>
+                <p>Ambiente seguro de autenticação institucional.</p>
             </div>
         </div>
 
         <div class="public-footer-links">
-            <a href="<?= e(url('/')) ?>">Inicio</a>
+            <a href="<?= e(url('/')) ?>">Início</a>
             <a href="<?= e(url('/planos')) ?>">Planos</a>
             <a href="<?= e(url('/acessar-plataforma')) ?>">Acessar plataforma</a>
         </div>
 
         <div class="public-footer-meta">
             <span>SaaS institucional</span>
-            <span>versao <?= e($appVersion) ?></span>
+            <span>versão <?= e($appVersion) ?></span>
             <span><?= e(date('Y')) ?>. Todos os direitos reservados.</span>
         </div>
     </div>

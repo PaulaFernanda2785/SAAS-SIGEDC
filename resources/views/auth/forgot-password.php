@@ -3,8 +3,8 @@
 declare(strict_types=1);
 ?>
 <section class="card auth-card">
-    <h1>Recuperacao de senha</h1>
-    <p>Informe seu login institucional para gerar um token de redefinicao.</p>
+    <h1>Recuperação de senha</h1>
+    <p>Informe seu login institucional para gerar um token de redefinição.</p>
 
     <form method="post" action="<?= e(url('/forgot-password')) ?>" data-guard-submit="true">
         <?= App\Support\Csrf::field('auth_forgot_password') ?>
@@ -25,7 +25,7 @@ declare(strict_types=1);
     </form>
 
     <p class="muted">
-        Ja possui token?
+        Já possui token?
         <a href="<?= e(url('/reset-password')) ?>">Redefinir senha</a>
     </p>
 </section>

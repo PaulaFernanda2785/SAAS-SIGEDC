@@ -22,13 +22,13 @@ $oldChecked = static fn(string $key): bool => App\Support\Flash::old($key) !== n
         <span>Onboarding comercial</span>
         <h2><?= e($planName) ?> no ciclo <?= e($selectedCycle) ?>: escolha como iniciar</h2>
         <div class="muted onboarding-flow-lines">
-            <p>Fluxo 1: teste por 3 dias em ambiente demonstrativo, sem liberacao de gravacoes operacionais.</p>
-            <p>Fluxo 2: assinatura imediata com checkout e liberacao de acesso somente apos confirmacao do pagamento.</p>
+            <p>Fluxo 1: teste por 3 dias em ambiente demonstrativo, sem liberação de gravações operacionais.</p>
+            <p>Fluxo 2: assinatura imediata com checkout e liberação de acesso somente após confirmação do pagamento.</p>
         </div>
     </header>
 
     <article class="card landing-card onboarding-summary-card">
-        <h3>Resumo da selecao</h3>
+        <h3>Resumo da seleção</h3>
         <?php if ($planDescription !== ''): ?>
             <p><?= e($planDescription) ?></p>
         <?php endif; ?>
@@ -48,7 +48,7 @@ $oldChecked = static fn(string $key): bool => App\Support\Flash::old($key) !== n
 
     <?php if ($errors !== []): ?>
         <article class="card landing-card">
-            <h3>Ajustes necessarios</h3>
+            <h3>Ajustes necessários</h3>
             <ul>
                 <?php foreach ($errors as $error): ?>
                     <li><?= e((string) $error) ?></li>
@@ -60,7 +60,7 @@ $oldChecked = static fn(string $key): bool => App\Support\Flash::old($key) !== n
     <div class="landing-grid-2 onboarding-grid">
         <article class="card landing-card onboarding-card">
             <h3>1) Testar por 3 dias</h3>
-            <p class="muted">Ideal para validar navegacao e recursos em ambiente demonstrativo. Gravacoes operacionais ficam bloqueadas no backend durante o trial.</p>
+            <p class="muted">Ideal para validar navegação e recursos em ambiente demonstrativo. Gravações operacionais ficam bloqueadas no backend durante o trial.</p>
 
             <form method="post" action="<?= e(url('/demonstracao/trial')) ?>" data-guard-submit="true" class="onboarding-form">
                 <?= App\Support\Csrf::field('public_trial_start') ?>
@@ -68,7 +68,7 @@ $oldChecked = static fn(string $key): bool => App\Support\Flash::old($key) !== n
                 <input type="hidden" name="billing_cycle" value="<?= e($selectedCycle) ?>">
 
                 <div class="field">
-                    <label for="trial_nome_responsavel">Nome do responsavel</label>
+                    <label for="trial_nome_responsavel">Nome do responsável</label>
                     <input id="trial_nome_responsavel" name="nome_responsavel" type="text" required value="<?= e($old('nome_responsavel')) ?>">
                 </div>
                 <div class="field">
@@ -80,15 +80,15 @@ $oldChecked = static fn(string $key): bool => App\Support\Flash::old($key) !== n
                     <input id="trial_password" name="password" type="password" minlength="8" required>
                 </div>
                 <div class="field">
-                    <label for="trial_password_confirmation">Confirmacao da senha</label>
+                    <label for="trial_password_confirmation">Confirmação da senha</label>
                     <input id="trial_password_confirmation" name="password_confirmation" type="password" minlength="8" required>
                 </div>
                 <div class="field">
-                    <label for="trial_nome_conta">Instituicao/conta</label>
+                    <label for="trial_nome_conta">Instituição/conta</label>
                     <input id="trial_nome_conta" name="nome_conta" type="text" required value="<?= e($old('nome_conta')) ?>">
                 </div>
                 <div class="field">
-                    <label for="trial_nome_orgao">Orgao operador</label>
+                    <label for="trial_nome_orgao">Órgão operador</label>
                     <input id="trial_nome_orgao" name="nome_orgao" type="text" required value="<?= e($old('nome_orgao')) ?>">
                 </div>
                 <div class="field">
@@ -108,17 +108,17 @@ $oldChecked = static fn(string $key): bool => App\Support\Flash::old($key) !== n
                     </select>
                 </div>
                 <div class="field">
-                    <label for="trial_municipio_nome">Municipio (autocomplete por UF)</label>
+                    <label for="trial_municipio_nome">Município (autocomplete por UF)</label>
                     <input id="trial_municipio_nome" name="municipio_nome" type="text" list="trial_municipios" value="<?= e($old('municipio_nome')) ?>" data-municipio-input data-municipio-list="trial_municipios" autocomplete="off">
                     <datalist id="trial_municipios"></datalist>
                 </div>
                 <label class="checkbox-line">
                     <input type="checkbox" name="aceite_termos" value="1" <?= $oldChecked('aceite_termos') ? 'checked' : '' ?>>
-                    Declaro que li os termos de uso e compreendo as regras do periodo demonstrativo.
+                    Declaro que li os termos de uso e compreendo as regras do período demonstrativo.
                 </label>
 
-                <button type="submit" class="button mt-1" data-submit-label="Iniciar demonstracao de 3 dias">
-                    <span class="button-text">Iniciar demonstracao de 3 dias</span>
+                <button type="submit" class="button mt-1" data-submit-label="Iniciar demonstração de 3 dias">
+                    <span class="button-text">Iniciar demonstração de 3 dias</span>
                     <span class="button-loading" hidden>Processando...</span>
                 </button>
             </form>
@@ -126,7 +126,7 @@ $oldChecked = static fn(string $key): bool => App\Support\Flash::old($key) !== n
 
         <article class="card landing-card onboarding-card">
             <h3>2) Assinar agora</h3>
-            <p class="muted">Fluxo direto para cadastro e checkout do plano selecionado. O acesso e liberado somente apos confirmacao do pagamento.</p>
+            <p class="muted">Fluxo direto para cadastro e checkout do plano selecionado. O acesso é liberado somente após confirmação do pagamento.</p>
 
             <form method="post" action="<?= e(url('/demonstracao/assinar')) ?>" data-guard-submit="true" class="onboarding-form">
                 <?= App\Support\Csrf::field('public_subscription_start') ?>
@@ -134,7 +134,7 @@ $oldChecked = static fn(string $key): bool => App\Support\Flash::old($key) !== n
                 <input type="hidden" name="billing_cycle" value="<?= e($selectedCycle) ?>">
 
                 <div class="field">
-                    <label for="sub_nome_responsavel">Nome do responsavel</label>
+                    <label for="sub_nome_responsavel">Nome do responsável</label>
                     <input id="sub_nome_responsavel" name="nome_responsavel" type="text" required value="<?= e($old('nome_responsavel')) ?>">
                 </div>
                 <div class="field">
@@ -146,15 +146,15 @@ $oldChecked = static fn(string $key): bool => App\Support\Flash::old($key) !== n
                     <input id="sub_password" name="password" type="password" minlength="8" required>
                 </div>
                 <div class="field">
-                    <label for="sub_password_confirmation">Confirmacao da senha</label>
+                    <label for="sub_password_confirmation">Confirmação da senha</label>
                     <input id="sub_password_confirmation" name="password_confirmation" type="password" minlength="8" required>
                 </div>
                 <div class="field">
-                    <label for="sub_nome_conta">Instituicao/conta</label>
+                    <label for="sub_nome_conta">Instituição/conta</label>
                     <input id="sub_nome_conta" name="nome_conta" type="text" required value="<?= e($old('nome_conta')) ?>">
                 </div>
                 <div class="field">
-                    <label for="sub_nome_orgao">Orgao operador</label>
+                    <label for="sub_nome_orgao">Órgão operador</label>
                     <input id="sub_nome_orgao" name="nome_orgao" type="text" required value="<?= e($old('nome_orgao')) ?>">
                 </div>
                 <div class="field">
@@ -174,13 +174,13 @@ $oldChecked = static fn(string $key): bool => App\Support\Flash::old($key) !== n
                     </select>
                 </div>
                 <div class="field">
-                    <label for="sub_municipio_nome">Municipio (autocomplete por UF)</label>
+                    <label for="sub_municipio_nome">Município (autocomplete por UF)</label>
                     <input id="sub_municipio_nome" name="municipio_nome" type="text" list="sub_municipios" value="<?= e($old('municipio_nome')) ?>" data-municipio-input data-municipio-list="sub_municipios" autocomplete="off">
                     <datalist id="sub_municipios"></datalist>
                 </div>
                 <label class="checkbox-line">
                     <input type="checkbox" name="aceite_termos" value="1" <?= $oldChecked('aceite_termos') ? 'checked' : '' ?>>
-                    Confirmo aceite dos termos e autorizo o fluxo de assinatura/cobranca do plano selecionado.
+                    Confirmo aceite dos termos e autorizo o fluxo de assinatura/cobrança do plano selecionado.
                 </label>
 
                 <button type="submit" class="button mt-1" data-submit-label="Cadastrar e ir para checkout">
