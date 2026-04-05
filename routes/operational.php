@@ -44,7 +44,9 @@ $router->post('/operational/desastres/seguranca', [DisasterController::class, 's
 $router->post('/operational/desastres/desmobilizacao', [DisasterController::class, 'storeDemobilization'], ['authenticate', 'area.operational', 'operational.access', 'disaster.access', 'csrf']);
 
 $router->get('/operational/relatorios/basico', [ReportController::class, 'basic'], $operationalMiddleware);
+$router->get('/operational/relatorios/basico/export', [ReportController::class, 'basicExport'], $operationalMiddleware);
 $router->get('/operational/relatorios/avancado', [ReportController::class, 'advanced'], $advancedReportsMiddleware);
+$router->get('/operational/relatorios/avancado/export', [ReportController::class, 'advancedExport'], $advancedReportsMiddleware);
 
 $router->get('/operational/inteligencia', [IntelligenceController::class, 'index'], $intelligenceMiddleware);
 

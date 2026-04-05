@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controllers\Operational;
 
+use App\Services\Export\OperationalReportExportService;
 use App\Services\Reports\OperationalAdvancedReportService;
 use App\Services\Reports\OperationalReportService;
+use App\Support\Flash;
 use App\Support\Request;
 use App\Support\Response;
 
@@ -13,7 +15,8 @@ final class ReportController
 {
     public function __construct(
         private readonly ?OperationalReportService $reportService = null,
-        private readonly ?OperationalAdvancedReportService $advancedReportService = null
+        private readonly ?OperationalAdvancedReportService $advancedReportService = null,
+        private readonly ?OperationalReportExportService $exportService = null
     ) {
     }
 
@@ -54,5 +57,45 @@ final class ReportController
             'activeAlerts' => $data['active_alerts'],
             'recentExecutions' => $data['recent_executions'],
         ], 'operational');
+    }
+
+    public function basicExport(Request $request): Response
+    {
+        $auth = $_SESSION['auth'] ?? [];
+        $format = (string) $request->input('formato', 'csv');
+
+        $result = ($this->exportService ?? new OperationalReportExportService())
+            ->exportBasic($auth, $request->all(), $format);
+
+        if (($result['ok'] ?? false) !== true) {
+            Flash::set('error', (string) ($result['message'] ?? 'Falha ao exportar relatorio basico.'));
+            return Response::redirect('/operational/relatorios/basico');
+        }
+
+        return Response::file(
+            (string) $result['file_path'],
+            (string) $result['download_name'],
+            (string) $result['mime_type']
+        );
+    }
+
+    public function advancedExport(Request $request): Response
+    {
+        $auth = $_SESSION['auth'] ?? [];
+        $format = (string) $request->input('formato', 'csv');
+
+        $result = ($this->exportService ?? new OperationalReportExportService())
+            ->exportAdvanced($auth, $request->all(), $format);
+
+        if (($result['ok'] ?? false) !== true) {
+            Flash::set('error', (string) ($result['message'] ?? 'Falha ao exportar relatorio avancado.'));
+            return Response::redirect('/operational/relatorios/avancado');
+        }
+
+        return Response::file(
+            (string) $result['file_path'],
+            (string) $result['download_name'],
+            (string) $result['mime_type']
+        );
     }
 }

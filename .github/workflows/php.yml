@@ -77,3 +77,6 @@ jobs:
 
       - name: Run integration test (Phase 4 operational)
         run: php tests/integration/phase4_operational_integration_test.php
+
+      - name: Run integration test (Operational exports)
+        run: php tests/integration/report_export_integration_test.php

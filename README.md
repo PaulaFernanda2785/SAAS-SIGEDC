@@ -153,7 +153,9 @@ Configure o Apache para apontar para `public/` e acesse:
 - `POST /operational/desastres/seguranca`
 - `POST /operational/desastres/desmobilizacao`
 - `GET /operational/relatorios/basico`
+- `GET /operational/relatorios/basico/export`
 - `GET /operational/relatorios/avancado`
+- `GET /operational/relatorios/avancado/export`
 - `GET /operational/inteligencia`
 - `GET /operational/documentos`
 - `GET /operational/documentos/download`
@@ -207,7 +209,8 @@ Configure o Apache para apontar para `public/` e acesse:
   - historico de aceites por usuario/versao.
 - Relatorio operacional avancado:
   - consolidacao de tendencia, hotspots, frequencia auditada e anexos por entidade;
-  - registro de execucao em `relatorios_avancados_execucoes`.
+  - exportacao inicial em planilha (CSV) e PDF;
+  - persistencia de exportacoes com caminho de arquivo em `relatorios_avancados_execucoes`.
 
 ## CI (GitHub Actions)
 
@@ -217,3 +220,5 @@ Configure o Apache para apontar para `public/` e acesse:
   - sobe MySQL 8.4
   - aplica `database/schema/*.sql` e `database/seeds/*.sql`
   - executa `php tests/integration/uf_context_integration_test.php`
+  - executa `php tests/integration/phase4_operational_integration_test.php`
+  - executa `php tests/integration/report_export_integration_test.php`

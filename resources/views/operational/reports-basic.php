@@ -12,6 +12,18 @@ $scope = $scope ?? [];
 
 $totalIncidentesFiltrados = count($incidents);
 $totalRegistrosFiltrados = count($recentRecords);
+
+$exportBaseParams = array_filter([
+    'incidente_id' => $filters['incidente_id'] ?? null,
+    'status_incidente' => $filters['status_incidente'] ?? null,
+    'data_inicio' => $filters['data_inicio'] ?? null,
+    'data_fim' => $filters['data_fim'] ?? null,
+], static fn(mixed $value): bool => $value !== null && $value !== '');
+$exportQuery = http_build_query($exportBaseParams);
+$exportCsvUrl = url('/operational/relatorios/basico/export')
+    . ($exportQuery !== '' ? '?' . $exportQuery . '&formato=csv' : '?formato=csv');
+$exportPdfUrl = url('/operational/relatorios/basico/export')
+    . ($exportQuery !== '' ? '?' . $exportQuery . '&formato=pdf' : '?formato=pdf');
 ?>
 <section class="hero">
     <h1>Relatorio Operacional Basico</h1>
@@ -69,6 +81,8 @@ $totalRegistrosFiltrados = count($recentRecords);
         <div class="actions">
             <button type="submit">Aplicar filtros</button>
             <a class="button button-secondary" href="<?= e(url('/operational/relatorios/basico')) ?>">Limpar</a>
+            <a class="button button-secondary" href="<?= e($exportCsvUrl) ?>">Exportar planilha (CSV)</a>
+            <a class="button button-secondary" href="<?= e($exportPdfUrl) ?>">Exportar PDF</a>
         </div>
     </form>
 </section>

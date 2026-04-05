@@ -23,7 +23,13 @@ final class OperationalAdvancedReportService
     ) {
     }
 
-    public function report(array $auth, array $filters): array
+    public function report(
+        array $auth,
+        array $filters,
+        bool $registerExecution = true,
+        ?string $executionFilePath = null,
+        string $executionType = 'OPERACIONAL_AVANCADO'
+    ): array
     {
         $scopeService = $this->scopeService ?? new ScopeService();
         $scope = $scopeService->scopeFilter($auth);
@@ -44,6 +50,7 @@ final class OperationalAdvancedReportService
                 'documents_by_entity' => [],
                 'active_alerts' => [],
                 'recent_executions' => [],
+                'total_records' => 0,
             ];
         }
 
@@ -60,17 +67,19 @@ final class OperationalAdvancedReportService
         $activeAlerts = $alertRepository->activeAlerts($scope, 25);
 
         $totalRecords = count($trend) + count($hotspots) + count($auditFrequency) + count($documentsByEntity) + count($activeAlerts);
-        $advancedReportRepository->registerExecution([
-            'conta_id' => $auth['conta_id'] ?? null,
-            'orgao_id' => $auth['orgao_id'] ?? null,
-            'unidade_id' => $auth['unidade_id'] ?? null,
-            'usuario_id' => $auth['usuario_id'] ?? null,
-            'tipo_relatorio' => 'OPERACIONAL_AVANCADO',
-            'filtros' => $normalizedFilters,
-            'status_execucao' => 'CONCLUIDO',
-            'total_registros' => $totalRecords,
-            'arquivo_caminho' => null,
-        ]);
+        if ($registerExecution) {
+            $advancedReportRepository->registerExecution([
+                'conta_id' => $auth['conta_id'] ?? null,
+                'orgao_id' => $auth['orgao_id'] ?? null,
+                'unidade_id' => $auth['unidade_id'] ?? null,
+                'usuario_id' => $auth['usuario_id'] ?? null,
+                'tipo_relatorio' => $executionType,
+                'filtros' => $normalizedFilters,
+                'status_execucao' => 'CONCLUIDO',
+                'total_registros' => $totalRecords,
+                'arquivo_caminho' => $executionFilePath,
+            ]);
+        }
 
         return [
             'scope' => $scope,
@@ -81,6 +90,7 @@ final class OperationalAdvancedReportService
             'documents_by_entity' => $documentsByEntity,
             'active_alerts' => $activeAlerts,
             'recent_executions' => $advancedReportRepository->recentExecutions($scope, 30),
+            'total_records' => $totalRecords,
         ];
     }
 
