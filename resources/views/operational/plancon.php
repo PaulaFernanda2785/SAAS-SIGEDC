@@ -7,9 +7,14 @@ $auth = $auth ?? [];
 $summary = $summary ?? [];
 $plancons = $plancons ?? [];
 $planconOptions = $planconOptions ?? [];
+$unitOptions = $unitOptions ?? [];
 $recentRisks = $recentRisks ?? [];
 $recentScenarios = $recentScenarios ?? [];
 $recentResources = $recentResources ?? [];
+$profiles = is_array($auth['perfis'] ?? null) ? $auth['perfis'] : [];
+$isAdminMaster = in_array(App\Domain\Enum\UserProfile::ADMIN_MASTER, $profiles, true);
+$currentUf = strtoupper(trim((string) ($auth['uf_sigla'] ?? '')));
+$currentUnitId = (int) ($auth['unidade_id'] ?? 0);
 ?>
 <section class="hero">
     <h1>PLANCON e Gestao de Riscos</h1>
@@ -44,15 +49,60 @@ $recentResources = $recentResources ?? [];
                 <label for="plancon_titulo_plano">Titulo do plano</label>
                 <input id="plancon_titulo_plano" name="titulo_plano" type="text" required>
             </div>
-            <?php if (($scope['restrict_to_unidade'] ?? false) !== true): ?>
+            <?php if (($scope['restrict_to_unidade'] ?? false) === true): ?>
+                <?php
+                $lockedUnitName = 'Unidade do contexto operacional';
+                foreach ($unitOptions as $unitItem) {
+                    if ((int) ($unitItem['id'] ?? 0) === $currentUnitId) {
+                        $lockedUnitName = (string) ($unitItem['nome_unidade'] ?? $lockedUnitName);
+                        break;
+                    }
+                }
+                ?>
+                <div class="field">
+                    <label for="plancon_unidade_locked">Unidade</label>
+                    <input id="plancon_unidade_locked" type="text" value="<?= e($lockedUnitName) ?>" readonly>
+                    <input type="hidden" name="unidade_id" value="<?= e((string) $currentUnitId) ?>">
+                </div>
+            <?php else: ?>
                 <div class="field">
                     <label for="plancon_unidade_id">Unidade (opcional)</label>
-                    <input id="plancon_unidade_id" name="unidade_id" type="number" min="1">
+                    <select id="plancon_unidade_id" name="unidade_id">
+                        <option value="">Sem unidade</option>
+                        <?php foreach ($unitOptions as $unitItem): ?>
+                            <?php $unitId = (int) ($unitItem['id'] ?? 0); ?>
+                            <option value="<?= e((string) $unitId) ?>" <?= $unitId === $currentUnitId ? 'selected' : '' ?>>
+                                <?= e((string) ($unitItem['nome_unidade'] ?? 'Unidade')) ?>
+                                <?php if (!empty($unitItem['codigo_unidade'])): ?>
+                                    (<?= e((string) $unitItem['codigo_unidade']) ?>)
+                                <?php endif; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             <?php endif; ?>
             <div class="field">
                 <label for="plancon_versao_documento">Versao</label>
                 <input id="plancon_versao_documento" name="versao_documento" type="text" placeholder="v1.0">
+            </div>
+            <div class="field">
+                <label for="plancon_uf_sigla">UF de referencia</label>
+                <?php if ($isAdminMaster): ?>
+                    <select
+                        id="plancon_uf_sigla"
+                        name="uf_sigla_referencia"
+                        data-uf-dynamic="true"
+                        data-uf-include-empty="false"
+                        data-uf-selected="<?= e($currentUf) ?>"
+                    >
+                        <?php if ($currentUf !== ''): ?>
+                            <option value="<?= e($currentUf) ?>"><?= e($currentUf) ?></option>
+                        <?php endif; ?>
+                    </select>
+                <?php else: ?>
+                    <input id="plancon_uf_sigla_label" type="text" value="<?= e($currentUf) ?>" readonly>
+                    <input id="plancon_uf_sigla" type="hidden" name="uf_sigla_referencia" value="<?= e($currentUf) ?>">
+                <?php endif; ?>
             </div>
             <div class="field">
                 <label for="plancon_municipio_estado">Municipio/UF</label>
@@ -61,7 +111,8 @@ $recentResources = $recentResources ?? [];
                     name="municipio_estado"
                     type="text"
                     data-municipio-autocomplete="true"
-                    data-uf="<?= e((string) ($auth['uf_sigla'] ?? '')) ?>"
+                    data-uf-source="#plancon_uf_sigla"
+                    data-uf="<?= e($currentUf) ?>"
                 >
             </div>
             <div class="field">

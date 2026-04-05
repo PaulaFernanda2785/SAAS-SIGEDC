@@ -27,6 +27,7 @@ final class IncidentController
             'incidents' => $workspace['incidents'],
             'incidentOptions' => $workspace['incident_options'],
             'periodOptions' => $workspace['period_options'],
+            'unitOptions' => $workspace['unit_options'],
             'recentRecords' => $workspace['recent_records'],
             'statusOptions' => $workspace['status_options'],
             'commandStatusOptions' => $workspace['command_status_options'],

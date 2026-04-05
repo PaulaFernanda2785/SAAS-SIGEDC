@@ -27,6 +27,7 @@ final class PlanconController
             'summary' => $workspace['summary'],
             'plancons' => $workspace['plancons'],
             'planconOptions' => $workspace['plancon_options'],
+            'unitOptions' => $workspace['unit_options'],
             'recentRisks' => $workspace['recent_risks'],
             'recentScenarios' => $workspace['recent_scenarios'],
             'recentResources' => $workspace['recent_resources'],

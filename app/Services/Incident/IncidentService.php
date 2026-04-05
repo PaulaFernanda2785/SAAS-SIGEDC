@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Incident;
 
+use App\Domain\Enum\BrazilUf;
 use App\Policies\OperationalPolicy;
 use App\Repositories\Operational\IncidentRepository;
+use App\Repositories\Operational\UnitRepository;
 use App\Services\Audit\AuditService;
 use App\Services\Institutional\ScopeService;
 use App\Support\Request;
@@ -15,6 +17,7 @@ final class IncidentService
 {
     public function __construct(
         private readonly ?IncidentRepository $incidentRepository = null,
+        private readonly ?UnitRepository $unitRepository = null,
         private readonly ?ScopeService $scopeService = null,
         private readonly ?OperationalPolicy $operationalPolicy = null,
         private readonly ?AuditService $auditService = null
@@ -61,6 +64,7 @@ final class IncidentService
                 'incidents' => [],
                 'incident_options' => [],
                 'period_options' => [],
+                'unit_options' => [],
                 'recent_records' => [],
                 'status_options' => ['ABERTO', 'EM_ANDAMENTO', 'CONTROLADO', 'ENCERRADO'],
                 'command_status_options' => ['ATIVO', 'TRANSFERIDO', 'ENCERRADO'],
@@ -73,12 +77,14 @@ final class IncidentService
         }
 
         $repository = $this->incidentRepository ?? new IncidentRepository();
+        $unitRepository = $this->unitRepository ?? new UnitRepository();
 
         return [
             'scope' => $scope,
             'incidents' => $repository->incidentsForWorkspace($scope),
             'incident_options' => $repository->incidentOptions($scope),
             'period_options' => $repository->periodOptions($scope),
+            'unit_options' => $unitRepository->optionsByScope($scope),
             'recent_records' => $repository->recentRecords($scope, 35),
             'status_options' => ['ABERTO', 'EM_ANDAMENTO', 'CONTROLADO', 'ENCERRADO'],
             'command_status_options' => ['ATIVO', 'TRANSFERIDO', 'ENCERRADO'],
@@ -118,8 +124,16 @@ final class IncidentService
         $classificacao = $classificacao === '' ? null : $classificacao;
 
         $scope = $scopeService->scopeFilter($auth);
+        $unitRepository = $this->unitRepository ?? new UnitRepository();
         $requestedUnitId = $this->nullableInt($input['unidade_id'] ?? null);
+        if ($requestedUnitId !== null && !$unitRepository->existsInScope($scope, $requestedUnitId)) {
+            return ['ok' => false, 'message' => 'Unidade informada nao pertence ao escopo institucional ativo.'];
+        }
+
         $targetUnitId = $scopeService->resolveTargetUnitId($auth, $requestedUnitId);
+        if ($targetUnitId !== null && !$unitRepository->existsInScope($scope, $targetUnitId)) {
+            return ['ok' => false, 'message' => 'Unidade alvo invalida para o seu escopo institucional.'];
+        }
         if (!$scopeService->canWriteToUnit($auth, $targetUnitId)) {
             return ['ok' => false, 'message' => 'Escopo atual nao permite gravar em outra unidade.'];
         }
@@ -142,7 +156,10 @@ final class IncidentService
                 'classificacao_inicial' => $classificacao,
                 'data_hora_acionamento' => $this->parseDateTimeInput($input['data_hora_acionamento'] ?? null),
                 'data_hora_abertura' => $dataHoraAbertura,
-                'municipio' => $this->nullableText($input['municipio'] ?? null),
+                'municipio' => $this->normalizeMunicipioValue(
+                    $input['municipio'] ?? null,
+                    $input['uf_sigla_referencia'] ?? ($auth['uf_sigla'] ?? null)
+                ),
                 'local_detalhado' => $this->nullableText($input['local_detalhado'] ?? null),
                 'coordenadas' => $this->nullableText($input['coordenadas'] ?? null),
                 'orgao_primeira_informacao' => $this->nullableText($input['orgao_primeira_informacao'] ?? null),
@@ -518,5 +535,24 @@ final class IncidentService
     {
         $orgao = $orgaoId > 0 ? (string) $orgaoId : 'X';
         return sprintf('INC-%s-%s-%03d', $orgao, date('YmdHis'), random_int(1, 999));
+    }
+
+    private function normalizeMunicipioValue(mixed $municipio, mixed $ufSigla): ?string
+    {
+        $nomeMunicipio = $this->nullableText($municipio);
+        if ($nomeMunicipio === null) {
+            return null;
+        }
+
+        $uf = BrazilUf::normalize($ufSigla);
+        if ($uf === null) {
+            return $nomeMunicipio;
+        }
+
+        if (preg_match('/\/[A-Z]{2}$/', $nomeMunicipio) === 1) {
+            return $nomeMunicipio;
+        }
+
+        return $nomeMunicipio . '/' . $uf;
     }
 }

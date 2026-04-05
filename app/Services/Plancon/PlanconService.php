@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Plancon;
 
+use App\Domain\Enum\BrazilUf;
 use App\Policies\OperationalPolicy;
+use App\Repositories\Operational\UnitRepository;
 use App\Repositories\Plancon\PlanconRepository;
 use App\Services\Audit\AuditService;
 use App\Services\Institutional\ScopeService;
@@ -15,6 +17,7 @@ final class PlanconService
 {
     public function __construct(
         private readonly ?PlanconRepository $planconRepository = null,
+        private readonly ?UnitRepository $unitRepository = null,
         private readonly ?ScopeService $scopeService = null,
         private readonly ?OperationalPolicy $operationalPolicy = null,
         private readonly ?AuditService $auditService = null
@@ -32,6 +35,7 @@ final class PlanconService
                 'summary' => ['total_plancons' => 0, 'plancons_ativos' => 0, 'plancons_em_revisao' => 0, 'plancons_vencidos' => 0],
                 'plancons' => [],
                 'plancon_options' => [],
+                'unit_options' => [],
                 'recent_risks' => [],
                 'recent_scenarios' => [],
                 'recent_resources' => [],
@@ -39,12 +43,14 @@ final class PlanconService
         }
 
         $repository = $this->planconRepository ?? new PlanconRepository();
+        $unitRepository = $this->unitRepository ?? new UnitRepository();
 
         return [
             'scope' => $scope,
             'summary' => $repository->summary($scope),
             'plancons' => $repository->plancons($scope),
             'plancon_options' => $repository->planconOptions($scope),
+            'unit_options' => $unitRepository->optionsByScope($scope),
             'recent_risks' => $repository->recentRisks($scope),
             'recent_scenarios' => $repository->recentScenarios($scope),
             'recent_resources' => $repository->recentResources($scope),
@@ -73,13 +79,28 @@ final class PlanconService
             'RASCUNHO'
         );
 
+        $scope = $scopeService->scopeFilter($auth);
+        $unitRepository = $this->unitRepository ?? new UnitRepository();
+        $requestedUnitId = $this->nullableInt($input['unidade_id'] ?? null);
+        if ($requestedUnitId !== null && !$unitRepository->existsInScope($scope, $requestedUnitId)) {
+            return ['ok' => false, 'message' => 'Unidade informada nao pertence ao escopo institucional ativo.'];
+        }
+
+        $targetUnitId = $scopeService->resolveTargetUnitId($auth, $requestedUnitId);
+        if ($targetUnitId !== null && !$unitRepository->existsInScope($scope, $targetUnitId)) {
+            return ['ok' => false, 'message' => 'Unidade alvo invalida para o seu escopo institucional.'];
+        }
+
         try {
             $id = ($this->planconRepository ?? new PlanconRepository())->createPlancon([
                 'conta_id' => (int) $auth['conta_id'],
                 'orgao_id' => (int) $auth['orgao_id'],
-                'unidade_id' => $scopeService->resolveTargetUnitId($auth, $this->nullableInt($input['unidade_id'] ?? null)),
+                'unidade_id' => $targetUnitId,
                 'titulo_plano' => $title,
-                'municipio_estado' => $this->nullableText($input['municipio_estado'] ?? null),
+                'municipio_estado' => $this->normalizeMunicipioValue(
+                    $input['municipio_estado'] ?? null,
+                    $input['uf_sigla_referencia'] ?? ($auth['uf_sigla'] ?? null)
+                ),
                 'versao_documento' => $this->nullableText($input['versao_documento'] ?? null),
                 'data_elaboracao' => $this->sanitizeDate($input['data_elaboracao'] ?? null),
                 'data_ultima_atualizacao' => $this->sanitizeDate($input['data_ultima_atualizacao'] ?? null),
@@ -416,5 +437,24 @@ final class PlanconService
     private function sanitizeEnum(string $value, array $allowed, string $default): string
     {
         return in_array($value, $allowed, true) ? $value : $default;
+    }
+
+    private function normalizeMunicipioValue(mixed $municipio, mixed $ufSigla): ?string
+    {
+        $nomeMunicipio = $this->nullableText($municipio);
+        if ($nomeMunicipio === null) {
+            return null;
+        }
+
+        $uf = BrazilUf::normalize($ufSigla);
+        if ($uf === null) {
+            return $nomeMunicipio;
+        }
+
+        if (preg_match('/\/[A-Z]{2}$/', $nomeMunicipio) === 1) {
+            return $nomeMunicipio;
+        }
+
+        return $nomeMunicipio . '/' . $uf;
     }
 }

@@ -7,6 +7,7 @@ $auth = $auth ?? [];
 $incidents = $incidents ?? [];
 $incidentOptions = $incidentOptions ?? [];
 $periodOptions = $periodOptions ?? [];
+$unitOptions = $unitOptions ?? [];
 $recentRecords = $recentRecords ?? [];
 $statusOptions = $statusOptions ?? [];
 $commandStatusOptions = $commandStatusOptions ?? [];
@@ -15,6 +16,10 @@ $recordTypeOptions = $recordTypeOptions ?? [];
 $recordStatusOptions = $recordStatusOptions ?? [];
 $criticalityOptions = $criticalityOptions ?? [];
 $classificationOptions = $classificationOptions ?? [];
+$profiles = is_array($auth['perfis'] ?? null) ? $auth['perfis'] : [];
+$isAdminMaster = in_array(App\Domain\Enum\UserProfile::ADMIN_MASTER, $profiles, true);
+$currentUf = strtoupper(trim((string) ($auth['uf_sigla'] ?? '')));
+$currentUnitId = (int) ($auth['unidade_id'] ?? 0);
 ?>
 <section class="hero">
     <h1>Gestao de Incidentes</h1>
@@ -63,12 +68,57 @@ $classificationOptions = $classificationOptions ?? [];
                     <?php endforeach; ?>
                 </select>
             </div>
-            <?php if (($scope['restrict_to_unidade'] ?? false) !== true): ?>
+            <?php if (($scope['restrict_to_unidade'] ?? false) === true): ?>
+                <?php
+                $lockedUnitName = 'Unidade do contexto operacional';
+                foreach ($unitOptions as $unitItem) {
+                    if ((int) ($unitItem['id'] ?? 0) === $currentUnitId) {
+                        $lockedUnitName = (string) ($unitItem['nome_unidade'] ?? $lockedUnitName);
+                        break;
+                    }
+                }
+                ?>
+                <div class="field">
+                    <label for="inc_unidade_locked">Unidade</label>
+                    <input id="inc_unidade_locked" type="text" value="<?= e($lockedUnitName) ?>" readonly>
+                    <input type="hidden" name="unidade_id" value="<?= e((string) $currentUnitId) ?>">
+                </div>
+            <?php else: ?>
                 <div class="field">
                     <label for="inc_unidade_id">Unidade (opcional)</label>
-                    <input id="inc_unidade_id" name="unidade_id" type="number" min="1" placeholder="ID da unidade">
+                    <select id="inc_unidade_id" name="unidade_id">
+                        <option value="">Sem unidade</option>
+                        <?php foreach ($unitOptions as $unitItem): ?>
+                            <?php $unitId = (int) ($unitItem['id'] ?? 0); ?>
+                            <option value="<?= e((string) $unitId) ?>" <?= $unitId === $currentUnitId ? 'selected' : '' ?>>
+                                <?= e((string) ($unitItem['nome_unidade'] ?? 'Unidade')) ?>
+                                <?php if (!empty($unitItem['codigo_unidade'])): ?>
+                                    (<?= e((string) $unitItem['codigo_unidade']) ?>)
+                                <?php endif; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             <?php endif; ?>
+            <div class="field">
+                <label for="inc_uf_sigla">UF de referencia</label>
+                <?php if ($isAdminMaster): ?>
+                    <select
+                        id="inc_uf_sigla"
+                        name="uf_sigla_referencia"
+                        data-uf-dynamic="true"
+                        data-uf-include-empty="false"
+                        data-uf-selected="<?= e($currentUf) ?>"
+                    >
+                        <?php if ($currentUf !== ''): ?>
+                            <option value="<?= e($currentUf) ?>"><?= e($currentUf) ?></option>
+                        <?php endif; ?>
+                    </select>
+                <?php else: ?>
+                    <input id="inc_uf_sigla_label" type="text" value="<?= e($currentUf) ?>" readonly>
+                    <input id="inc_uf_sigla" type="hidden" name="uf_sigla_referencia" value="<?= e($currentUf) ?>">
+                <?php endif; ?>
+            </div>
             <div class="field">
                 <label for="inc_municipio">Municipio</label>
                 <input
@@ -76,7 +126,8 @@ $classificationOptions = $classificationOptions ?? [];
                     name="municipio"
                     type="text"
                     data-municipio-autocomplete="true"
-                    data-uf="<?= e((string) ($auth['uf_sigla'] ?? '')) ?>"
+                    data-uf-source="#inc_uf_sigla"
+                    data-uf="<?= e($currentUf) ?>"
                 >
             </div>
             <div class="field">
