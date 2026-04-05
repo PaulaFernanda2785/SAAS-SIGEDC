@@ -1,0 +1,238 @@
+-- SIGERD
+-- Fase 5 - Escala institucional, integracoes e recursos enterprise
+-- MySQL 8+ / MariaDB compativel
+
+SET NAMES utf8mb4;
+SET time_zone = '+00:00';
+
+CREATE TABLE IF NOT EXISTS enterprise_feature_flags (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conta_id BIGINT UNSIGNED NOT NULL,
+    orgao_id BIGINT UNSIGNED NULL,
+    unidade_id BIGINT UNSIGNED NULL,
+    feature_code VARCHAR(80) NOT NULL,
+    status_feature ENUM('ATIVA', 'INATIVA') NOT NULL DEFAULT 'ATIVA',
+    plano_referencia VARCHAR(40) NULL,
+    configuracoes_json JSON NULL,
+    habilitado_por_usuario_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_enterprise_feature_conta FOREIGN KEY (conta_id) REFERENCES contas(id),
+    CONSTRAINT fk_enterprise_feature_orgao FOREIGN KEY (orgao_id) REFERENCES orgaos(id),
+    CONSTRAINT fk_enterprise_feature_unidade FOREIGN KEY (unidade_id) REFERENCES unidades(id),
+    CONSTRAINT fk_enterprise_feature_usuario FOREIGN KEY (habilitado_por_usuario_id) REFERENCES usuarios(id),
+    UNIQUE KEY uk_enterprise_feature_scope (conta_id, orgao_id, unidade_id, feature_code),
+    KEY idx_enterprise_feature_status (status_feature, feature_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS api_client_apps (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conta_id BIGINT UNSIGNED NOT NULL,
+    orgao_id BIGINT UNSIGNED NULL,
+    unidade_id BIGINT UNSIGNED NULL,
+    nome_app VARCHAR(160) NOT NULL,
+    token_prefix CHAR(12) NOT NULL,
+    token_hash CHAR(64) NOT NULL,
+    escopos_json JSON NULL,
+    limite_rpm INT UNSIGNED NOT NULL DEFAULT 600,
+    status_app ENUM('ATIVA', 'BLOQUEADA', 'REVOGADA') NOT NULL DEFAULT 'ATIVA',
+    ultimo_uso_em DATETIME NULL,
+    expira_em DATETIME NULL,
+    criado_por_usuario_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_api_client_conta FOREIGN KEY (conta_id) REFERENCES contas(id),
+    CONSTRAINT fk_api_client_orgao FOREIGN KEY (orgao_id) REFERENCES orgaos(id),
+    CONSTRAINT fk_api_client_unidade FOREIGN KEY (unidade_id) REFERENCES unidades(id),
+    CONSTRAINT fk_api_client_usuario FOREIGN KEY (criado_por_usuario_id) REFERENCES usuarios(id),
+    UNIQUE KEY uk_api_client_token_hash (token_hash),
+    KEY idx_api_client_scope_status (conta_id, orgao_id, unidade_id, status_app),
+    KEY idx_api_client_expiracao (expira_em, status_app)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS integracoes_externas (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conta_id BIGINT UNSIGNED NOT NULL,
+    orgao_id BIGINT UNSIGNED NULL,
+    unidade_id BIGINT UNSIGNED NULL,
+    nome_integracao VARCHAR(180) NOT NULL,
+    tipo_integracao ENUM('WEBHOOK', 'HTTP_API') NOT NULL DEFAULT 'WEBHOOK',
+    endpoint_url VARCHAR(255) NOT NULL,
+    auth_tipo ENUM('NENHUMA', 'BEARER', 'BASIC', 'HEADER') NOT NULL DEFAULT 'NENHUMA',
+    credencial_ref VARCHAR(180) NULL,
+    timeout_ms INT UNSIGNED NOT NULL DEFAULT 4000,
+    status_integracao ENUM('ATIVA', 'INATIVA') NOT NULL DEFAULT 'ATIVA',
+    configuracoes_json JSON NULL,
+    criado_por_usuario_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_integracoes_conta FOREIGN KEY (conta_id) REFERENCES contas(id),
+    CONSTRAINT fk_integracoes_orgao FOREIGN KEY (orgao_id) REFERENCES orgaos(id),
+    CONSTRAINT fk_integracoes_unidade FOREIGN KEY (unidade_id) REFERENCES unidades(id),
+    CONSTRAINT fk_integracoes_usuario FOREIGN KEY (criado_por_usuario_id) REFERENCES usuarios(id),
+    KEY idx_integracoes_scope_status (conta_id, orgao_id, unidade_id, status_integracao),
+    KEY idx_integracoes_tipo (tipo_integracao, status_integracao)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS integracoes_execucoes (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    integracao_id BIGINT UNSIGNED NOT NULL,
+    conta_id BIGINT UNSIGNED NOT NULL,
+    orgao_id BIGINT UNSIGNED NULL,
+    unidade_id BIGINT UNSIGNED NULL,
+    trigger_codigo VARCHAR(80) NOT NULL,
+    payload_json JSON NULL,
+    resposta_status SMALLINT UNSIGNED NULL,
+    resposta_excerpt VARCHAR(500) NULL,
+    status_execucao ENUM('SUCESSO', 'FALHA') NOT NULL DEFAULT 'SUCESSO',
+    executado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_integracoes_exec_integracao FOREIGN KEY (integracao_id) REFERENCES integracoes_externas(id),
+    CONSTRAINT fk_integracoes_exec_conta FOREIGN KEY (conta_id) REFERENCES contas(id),
+    CONSTRAINT fk_integracoes_exec_orgao FOREIGN KEY (orgao_id) REFERENCES orgaos(id),
+    CONSTRAINT fk_integracoes_exec_unidade FOREIGN KEY (unidade_id) REFERENCES unidades(id),
+    KEY idx_integracoes_exec_scope_data (conta_id, orgao_id, unidade_id, executado_em),
+    KEY idx_integracoes_exec_status (status_execucao, resposta_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS automacoes_regras (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conta_id BIGINT UNSIGNED NOT NULL,
+    orgao_id BIGINT UNSIGNED NULL,
+    unidade_id BIGINT UNSIGNED NULL,
+    nome_regra VARCHAR(180) NOT NULL,
+    evento_codigo VARCHAR(80) NOT NULL,
+    condicao_json JSON NULL,
+    acao_tipo ENUM('DISPARAR_INTEGRACAO', 'ABRIR_TICKET', 'GERAR_ALERTA') NOT NULL DEFAULT 'DISPARAR_INTEGRACAO',
+    acao_config_json JSON NULL,
+    status_regra ENUM('ATIVA', 'INATIVA') NOT NULL DEFAULT 'ATIVA',
+    criado_por_usuario_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_automacoes_regras_conta FOREIGN KEY (conta_id) REFERENCES contas(id),
+    CONSTRAINT fk_automacoes_regras_orgao FOREIGN KEY (orgao_id) REFERENCES orgaos(id),
+    CONSTRAINT fk_automacoes_regras_unidade FOREIGN KEY (unidade_id) REFERENCES unidades(id),
+    CONSTRAINT fk_automacoes_regras_usuario FOREIGN KEY (criado_por_usuario_id) REFERENCES usuarios(id),
+    KEY idx_automacoes_regras_scope_status (conta_id, orgao_id, unidade_id, status_regra),
+    KEY idx_automacoes_regras_evento (evento_codigo, acao_tipo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS automacoes_execucoes (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    regra_id BIGINT UNSIGNED NOT NULL,
+    conta_id BIGINT UNSIGNED NOT NULL,
+    orgao_id BIGINT UNSIGNED NULL,
+    unidade_id BIGINT UNSIGNED NULL,
+    evento_codigo VARCHAR(80) NOT NULL,
+    contexto_json JSON NULL,
+    status_execucao ENUM('SUCESSO', 'FALHA', 'IGNORADA') NOT NULL DEFAULT 'SUCESSO',
+    mensagem VARCHAR(255) NULL,
+    executado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_automacoes_exec_regra FOREIGN KEY (regra_id) REFERENCES automacoes_regras(id),
+    CONSTRAINT fk_automacoes_exec_conta FOREIGN KEY (conta_id) REFERENCES contas(id),
+    CONSTRAINT fk_automacoes_exec_orgao FOREIGN KEY (orgao_id) REFERENCES orgaos(id),
+    CONSTRAINT fk_automacoes_exec_unidade FOREIGN KEY (unidade_id) REFERENCES unidades(id),
+    KEY idx_automacoes_exec_scope_data (conta_id, orgao_id, unidade_id, executado_em),
+    KEY idx_automacoes_exec_status (status_execucao, evento_codigo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS sla_politicas (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conta_id BIGINT UNSIGNED NOT NULL,
+    orgao_id BIGINT UNSIGNED NULL,
+    unidade_id BIGINT UNSIGNED NULL,
+    codigo_sla VARCHAR(80) NOT NULL,
+    nome_sla VARCHAR(180) NOT NULL,
+    prioridade ENUM('BAIXA', 'MODERADA', 'ALTA', 'CRITICA') NOT NULL DEFAULT 'MODERADA',
+    tempo_resposta_min INT UNSIGNED NOT NULL,
+    tempo_resolucao_min INT UNSIGNED NOT NULL,
+    status_sla ENUM('ATIVA', 'INATIVA') NOT NULL DEFAULT 'ATIVA',
+    criado_por_usuario_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sla_politicas_conta FOREIGN KEY (conta_id) REFERENCES contas(id),
+    CONSTRAINT fk_sla_politicas_orgao FOREIGN KEY (orgao_id) REFERENCES orgaos(id),
+    CONSTRAINT fk_sla_politicas_unidade FOREIGN KEY (unidade_id) REFERENCES unidades(id),
+    CONSTRAINT fk_sla_politicas_usuario FOREIGN KEY (criado_por_usuario_id) REFERENCES usuarios(id),
+    UNIQUE KEY uk_sla_politicas_scope_codigo (conta_id, orgao_id, unidade_id, codigo_sla),
+    KEY idx_sla_politicas_scope_status (conta_id, orgao_id, unidade_id, status_sla)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS suporte_tickets (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conta_id BIGINT UNSIGNED NOT NULL,
+    orgao_id BIGINT UNSIGNED NULL,
+    unidade_id BIGINT UNSIGNED NULL,
+    sla_politica_id BIGINT UNSIGNED NULL,
+    titulo_ticket VARCHAR(180) NOT NULL,
+    descricao_ticket TEXT NOT NULL,
+    prioridade ENUM('BAIXA', 'MODERADA', 'ALTA', 'CRITICA') NOT NULL DEFAULT 'MODERADA',
+    status_ticket ENUM('ABERTO', 'EM_ATENDIMENTO', 'RESOLVIDO', 'FECHADO') NOT NULL DEFAULT 'ABERTO',
+    aberto_por_usuario_id BIGINT UNSIGNED NOT NULL,
+    atribuido_para_usuario_id BIGINT UNSIGNED NULL,
+    aberto_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    resposta_limite_em DATETIME NULL,
+    resolucao_limite_em DATETIME NULL,
+    primeira_resposta_em DATETIME NULL,
+    resolvido_em DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_suporte_ticket_conta FOREIGN KEY (conta_id) REFERENCES contas(id),
+    CONSTRAINT fk_suporte_ticket_orgao FOREIGN KEY (orgao_id) REFERENCES orgaos(id),
+    CONSTRAINT fk_suporte_ticket_unidade FOREIGN KEY (unidade_id) REFERENCES unidades(id),
+    CONSTRAINT fk_suporte_ticket_sla FOREIGN KEY (sla_politica_id) REFERENCES sla_politicas(id),
+    CONSTRAINT fk_suporte_ticket_aberto_por FOREIGN KEY (aberto_por_usuario_id) REFERENCES usuarios(id),
+    CONSTRAINT fk_suporte_ticket_atribuido FOREIGN KEY (atribuido_para_usuario_id) REFERENCES usuarios(id),
+    KEY idx_suporte_ticket_scope_status (conta_id, orgao_id, unidade_id, status_ticket),
+    KEY idx_suporte_ticket_sla (resposta_limite_em, resolucao_limite_em, prioridade)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS assinaturas_digitais_registros (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conta_id BIGINT UNSIGNED NOT NULL,
+    orgao_id BIGINT UNSIGNED NULL,
+    unidade_id BIGINT UNSIGNED NULL,
+    entidade_tipo VARCHAR(80) NOT NULL,
+    entidade_id BIGINT UNSIGNED NOT NULL,
+    hash_documento CHAR(64) NOT NULL,
+    algoritmo_hash ENUM('SHA256') NOT NULL DEFAULT 'SHA256',
+    certificado_ref VARCHAR(180) NULL,
+    assinatura_payload_json JSON NULL,
+    assinado_por_usuario_id BIGINT UNSIGNED NOT NULL,
+    assinado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_assinaturas_digitais_conta FOREIGN KEY (conta_id) REFERENCES contas(id),
+    CONSTRAINT fk_assinaturas_digitais_orgao FOREIGN KEY (orgao_id) REFERENCES orgaos(id),
+    CONSTRAINT fk_assinaturas_digitais_unidade FOREIGN KEY (unidade_id) REFERENCES unidades(id),
+    CONSTRAINT fk_assinaturas_digitais_usuario FOREIGN KEY (assinado_por_usuario_id) REFERENCES usuarios(id),
+    KEY idx_assinaturas_digitais_entidade (entidade_tipo, entidade_id, assinado_em),
+    KEY idx_assinaturas_digitais_scope (conta_id, orgao_id, unidade_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS relatorios_executivos_consolidados (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conta_id BIGINT UNSIGNED NOT NULL,
+    orgao_id BIGINT UNSIGNED NULL,
+    unidade_id BIGINT UNSIGNED NULL,
+    periodo_inicio DATE NULL,
+    periodo_fim DATE NULL,
+    filtros_json JSON NULL,
+    resumo_json JSON NULL,
+    total_incidentes INT UNSIGNED NOT NULL DEFAULT 0,
+    total_plancons INT UNSIGNED NOT NULL DEFAULT 0,
+    total_alertas_ativos INT UNSIGNED NOT NULL DEFAULT 0,
+    total_tickets_abertos INT UNSIGNED NOT NULL DEFAULT 0,
+    total_tickets_sla_vencido INT UNSIGNED NOT NULL DEFAULT 0,
+    arquivo_caminho VARCHAR(255) NULL,
+    gerado_por_usuario_id BIGINT UNSIGNED NOT NULL,
+    gerado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_rel_exec_conta FOREIGN KEY (conta_id) REFERENCES contas(id),
+    CONSTRAINT fk_rel_exec_orgao FOREIGN KEY (orgao_id) REFERENCES orgaos(id),
+    CONSTRAINT fk_rel_exec_unidade FOREIGN KEY (unidade_id) REFERENCES unidades(id),
+    CONSTRAINT fk_rel_exec_usuario FOREIGN KEY (gerado_por_usuario_id) REFERENCES usuarios(id),
+    KEY idx_rel_exec_scope_data (conta_id, orgao_id, unidade_id, gerado_em),
+    KEY idx_rel_exec_periodo (periodo_inicio, periodo_fim)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

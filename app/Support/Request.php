@@ -73,6 +73,46 @@ final class Request
         return substr((string) ($this->serverParams['HTTP_USER_AGENT'] ?? 'unknown'), 0, 255);
     }
 
+    public function server(string $key, mixed $default = null): mixed
+    {
+        return $this->serverParams[$key] ?? $default;
+    }
+
+    public function header(string $name, mixed $default = null): mixed
+    {
+        $normalized = strtoupper(str_replace('-', '_', trim($name)));
+        if ($normalized === '') {
+            return $default;
+        }
+
+        $serverKey = 'HTTP_' . $normalized;
+        if (array_key_exists($serverKey, $this->serverParams)) {
+            return $this->serverParams[$serverKey];
+        }
+
+        if ($normalized === 'CONTENT_TYPE' && array_key_exists('CONTENT_TYPE', $this->serverParams)) {
+            return $this->serverParams['CONTENT_TYPE'];
+        }
+
+        if ($normalized === 'CONTENT_LENGTH' && array_key_exists('CONTENT_LENGTH', $this->serverParams)) {
+            return $this->serverParams['CONTENT_LENGTH'];
+        }
+
+        if ($normalized === 'AUTHORIZATION') {
+            if (array_key_exists('HTTP_AUTHORIZATION', $this->serverParams)) {
+                return $this->serverParams['HTTP_AUTHORIZATION'];
+            }
+            if (array_key_exists('REDIRECT_HTTP_AUTHORIZATION', $this->serverParams)) {
+                return $this->serverParams['REDIRECT_HTTP_AUTHORIZATION'];
+            }
+            if (array_key_exists('Authorization', $this->serverParams)) {
+                return $this->serverParams['Authorization'];
+            }
+        }
+
+        return $default;
+    }
+
     private static function normalizeUri(string $uri): string
     {
         $basePath = \app_base_path();

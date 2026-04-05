@@ -10,6 +10,10 @@ permissions:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.3', '8.4']
     services:
       mysql:
         image: mysql:8.4
@@ -31,7 +35,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: ${{ matrix.php-version }}
           extensions: mbstring, pdo_mysql
           coverage: none
 
@@ -80,3 +84,6 @@ jobs:
 
       - name: Run integration test (Operational exports)
         run: php tests/integration/report_export_integration_test.php
+
+      - name: Run integration test (Phase 5 enterprise)
+        run: php tests/integration/phase5_enterprise_integration_test.php

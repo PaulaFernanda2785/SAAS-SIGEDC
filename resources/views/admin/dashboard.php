@@ -31,6 +31,7 @@ declare(strict_types=1);
         <ul>
             <li><a href="<?= e(url('/admin/institucional')) ?>">Cadastrar contas, orgaos, unidades e usuarios</a></li>
             <li><a href="<?= e(url('/admin/comercial')) ?>">Gerenciar planos, assinaturas e modulos</a></li>
+            <li><a href="<?= e(url('/admin/enterprise')) ?>">Configurar recursos enterprise e API controlada</a></li>
             <li><a href="<?= e(url('/planos')) ?>">Validar pagina publica de planos</a></li>
         </ul>
     </article>

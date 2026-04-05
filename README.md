@@ -1,6 +1,6 @@
-# SIGERD - Fase 4 (Inteligencia operacional, documentos e governanca avancada)
+# SIGERD - Fase 5 (Escala institucional, integracoes e recursos enterprise)
 
-Esta entrega adiciona a Fase 4 sobre a fundacao das fases anteriores:
+Esta entrega adiciona a Fase 5 sobre a fundacao das fases anteriores:
 
 - area publica inicial (landing, planos e demonstracao);
 - autenticacao com recuperacao de senha por token;
@@ -22,6 +22,9 @@ Esta entrega adiciona a Fase 4 sobre a fundacao das fases anteriores:
 - documentos operacionais com download seguro por escopo institucional.
 - governanca operacional com aceite de termo, trilha de auditoria e conformidade.
 - relatorio operacional avancado com registro de execucao e consolidacao analitica.
+- area enterprise administrativa com API controlada, integracoes, automacoes, SLA/suporte e assinatura digital.
+- endpoint API enterprise para resumo executivo com autenticacao por chave.
+- relatorio executivo consolidado persistido para governanca de contas maiores.
 
 ## Requisitos
 
@@ -50,6 +53,7 @@ source database/schema/003_phase2_operational_core.sql;
 source database/schema/004_phase3_plancon_disaster_expansion.sql;
 source database/schema/005_phase3_uf_territorios.sql;
 source database/schema/006_phase4_intelligence_documents_governance.sql;
+source database/schema/007_phase5_enterprise_scale_integrations.sql;
 ```
 
 5. Execute os seeds:
@@ -61,6 +65,7 @@ source database/seeds/003_phase2_seed.sql;
 source database/seeds/004_phase3_seed.sql;
 source database/seeds/005_phase3_uf_seed.sql;
 source database/seeds/006_phase4_seed.sql;
+source database/seeds/007_phase5_seed.sql;
 ```
 
 6. Opcional: gere autoload do Composer:
@@ -129,6 +134,15 @@ Configure o Apache para apontar para `public/` e acesse:
 - `POST /admin/comercial/planos`
 - `POST /admin/comercial/assinaturas`
 - `POST /admin/comercial/modulos`
+- `GET /admin/enterprise`
+- `POST /admin/enterprise/features`
+- `POST /admin/enterprise/api-apps`
+- `POST /admin/enterprise/integracoes`
+- `POST /admin/enterprise/automacoes`
+- `POST /admin/enterprise/sla`
+- `POST /admin/enterprise/tickets`
+- `POST /admin/enterprise/assinaturas-digitais`
+- `POST /admin/enterprise/relatorios-executivos`
 
 ## Rotas operacionais
 
@@ -163,7 +177,7 @@ Configure o Apache para apontar para `public/` e acesse:
 - `GET /operational/governanca`
 - `POST /operational/governanca/termo-aceite`
 
-## Observacoes da Fase 4
+## Observacoes da Fase 5
 
 - O login agora valida:
   - `status_usuario = ATIVO`
@@ -186,6 +200,7 @@ Configure o Apache para apontar para `public/` e acesse:
 - Endpoint de autocomplete territorial:
   - `GET /api/territorios/ufs`
   - `GET /api/territorios/municipios?uf=TO&q=pal`
+  - `GET /api/enterprise/executivo` (header `X-Api-Key` ou `Authorization: Bearer ...`)
   - protegido por autenticacao e escopo UF.
   - cache backend por `UF+prefixo` em `storage/cache/territory` para reduzir carga de consulta.
 - As rotas de Fase 4 validam:
@@ -211,6 +226,12 @@ Configure o Apache para apontar para `public/` e acesse:
   - consolidacao de tendencia, hotspots, frequencia auditada e anexos por entidade;
   - exportacao inicial em planilha (CSV) e PDF;
   - persistencia de exportacoes com caminho de arquivo em `relatorios_avancados_execucoes`.
+- Enterprise:
+  - novo middleware `enterprise.access` para rotas administrativas de escala enterprise;
+  - novo middleware `api.key` para API controlada por token hash (sem segredo em banco/log);
+  - modulo contratado obrigatorio por capacidade (`ENTERPRISE_CORE`, `API_ENTERPRISE`, `INTEGRACOES_EXTERNAS`, `AUTOMACOES`, `ANALYTICS_EXECUTIVO`, `SLA_SUPORTE`, `ASSINATURA_DIGITAL`);
+  - trilha de auditoria para operacoes criticas enterprise e recusas de acesso;
+  - visao executiva consolidada por conta/orgao/unidade com persistencia em `relatorios_executivos_consolidados`.
 
 ## CI (GitHub Actions)
 
@@ -218,7 +239,9 @@ Configure o Apache para apontar para `public/` e acesse:
 - Disparo automatico: a cada `push` e `pull_request`
 - Pipeline:
   - sobe MySQL 8.4
+  - executa matriz PHP 8.3 e 8.4
   - aplica `database/schema/*.sql` e `database/seeds/*.sql`
   - executa `php tests/integration/uf_context_integration_test.php`
   - executa `php tests/integration/phase4_operational_integration_test.php`
   - executa `php tests/integration/report_export_integration_test.php`
+  - executa `php tests/integration/phase5_enterprise_integration_test.php`

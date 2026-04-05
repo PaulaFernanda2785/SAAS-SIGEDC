@@ -24,6 +24,7 @@ $flash = App\Support\Flash::all();
             <a href="<?= e(url('/admin')) ?>">Dashboard</a>
             <a href="<?= e(url('/admin/institucional')) ?>">Institucional</a>
             <a href="<?= e(url('/admin/comercial')) ?>">Comercial</a>
+            <a href="<?= e(url('/admin/enterprise')) ?>">Enterprise</a>
             <form method="post" action="<?= e(url('/logout')) ?>" class="inline-form">
                 <?= App\Support\Csrf::field('auth_logout') ?>
                 <button type="submit">Sair</button>

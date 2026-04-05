@@ -137,6 +137,21 @@ final class InstitutionRepository
         return $statement->fetchAll();
     }
 
+    public function unidadeById(int $unidadeId): ?array
+    {
+        $statement = $this->pdo()->prepare(
+            'SELECT u.id, u.orgao_id, o.conta_id, u.uf_sigla, u.status_unidade
+             FROM unidades u
+             INNER JOIN orgaos o ON o.id = u.orgao_id
+             WHERE u.id = :id
+             LIMIT 1'
+        );
+        $statement->execute(['id' => $unidadeId]);
+        $row = $statement->fetch();
+
+        return $row !== false ? $row : null;
+    }
+
     public function createUnidade(array $data): int
     {
         $statement = $this->pdo()->prepare(

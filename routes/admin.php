@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\InstitutionController;
 use App\Controllers\Admin\CommercialController;
+use App\Controllers\Admin\EnterpriseController;
 
 $router->get('/admin', [DashboardController::class, 'index'], ['authenticate', 'area.admin']);
 
@@ -20,3 +21,15 @@ $router->get('/admin/comercial', [CommercialController::class, 'index'], ['authe
 $router->post('/admin/comercial/planos', [CommercialController::class, 'storePlan'], ['authenticate', 'area.admin', 'csrf']);
 $router->post('/admin/comercial/assinaturas', [CommercialController::class, 'storeAssinatura'], ['authenticate', 'area.admin', 'csrf']);
 $router->post('/admin/comercial/modulos', [CommercialController::class, 'upsertModulo'], ['authenticate', 'area.admin', 'csrf']);
+
+$enterpriseMiddleware = ['authenticate', 'area.admin', 'enterprise.access'];
+
+$router->get('/admin/enterprise', [EnterpriseController::class, 'index'], $enterpriseMiddleware);
+$router->post('/admin/enterprise/features', [EnterpriseController::class, 'storeFeature'], ['authenticate', 'area.admin', 'enterprise.access', 'csrf']);
+$router->post('/admin/enterprise/api-apps', [EnterpriseController::class, 'storeApiApp'], ['authenticate', 'area.admin', 'enterprise.access', 'csrf']);
+$router->post('/admin/enterprise/integracoes', [EnterpriseController::class, 'storeIntegracao'], ['authenticate', 'area.admin', 'enterprise.access', 'csrf']);
+$router->post('/admin/enterprise/automacoes', [EnterpriseController::class, 'storeAutomacao'], ['authenticate', 'area.admin', 'enterprise.access', 'csrf']);
+$router->post('/admin/enterprise/sla', [EnterpriseController::class, 'storeSla'], ['authenticate', 'area.admin', 'enterprise.access', 'csrf']);
+$router->post('/admin/enterprise/tickets', [EnterpriseController::class, 'storeTicket'], ['authenticate', 'area.admin', 'enterprise.access', 'csrf']);
+$router->post('/admin/enterprise/assinaturas-digitais', [EnterpriseController::class, 'storeDigitalSignature'], ['authenticate', 'area.admin', 'enterprise.access', 'csrf']);
+$router->post('/admin/enterprise/relatorios-executivos', [EnterpriseController::class, 'storeExecutiveReport'], ['authenticate', 'area.admin', 'enterprise.access', 'csrf']);

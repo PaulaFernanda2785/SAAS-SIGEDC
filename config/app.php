@@ -20,6 +20,8 @@ return [
         'documents.access' => App\Middleware\CheckDocumentsAccess::class,
         'governance.access' => App\Middleware\CheckGovernanceAccess::class,
         'advanced.reports.access' => App\Middleware\CheckAdvancedReportsAccess::class,
+        'enterprise.access' => App\Middleware\CheckEnterpriseAccess::class,
+        'api.key' => App\Middleware\AuthenticateApiKey::class,
         'csrf' => App\Middleware\VerifyCsrfToken::class,
     ],
 ];
