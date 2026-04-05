@@ -1,6 +1,6 @@
-# SIGERD - Fase 3 (Expansao do PLANCON e do gerenciamento de desastres)
+# SIGERD - Fase 4 (Inteligencia operacional, documentos e governanca avancada)
 
-Esta entrega adiciona a Fase 3 sobre a fundacao das fases anteriores:
+Esta entrega adiciona a Fase 4 sobre a fundacao das fases anteriores:
 
 - area publica inicial (landing, planos e demonstracao);
 - autenticacao com recuperacao de senha por token;
@@ -16,6 +16,10 @@ Esta entrega adiciona a Fase 3 sobre a fundacao das fases anteriores:
 - relatorio operacional basico por escopo institucional.
 - modulo PLANCON com blocos de risco, cenario, ativacao, recursos e revisao.
 - modulo de expansao de desastres com PAI, operacoes, planejamento, seguranca e desmobilizacao.
+- inteligencia operacional com hotspots, tendencia e pontos de mapa.
+- documentos operacionais com upload auditado e vinculo por entidade.
+- governanca operacional com aceite de termo, trilha de auditoria e conformidade.
+- relatorio operacional avancado com registro de execucao e consolidacao analitica.
 
 ## Requisitos
 
@@ -43,6 +47,7 @@ source database/schema/002_phase1_saas_core.sql;
 source database/schema/003_phase2_operational_core.sql;
 source database/schema/004_phase3_plancon_disaster_expansion.sql;
 source database/schema/005_phase3_uf_territorios.sql;
+source database/schema/006_phase4_intelligence_documents_governance.sql;
 ```
 
 5. Execute os seeds:
@@ -53,6 +58,7 @@ source database/seeds/002_phase1_seed.sql;
 source database/seeds/003_phase2_seed.sql;
 source database/seeds/004_phase3_seed.sql;
 source database/seeds/005_phase3_uf_seed.sql;
+source database/seeds/006_phase4_seed.sql;
 ```
 
 6. Opcional: gere autoload do Composer:
@@ -145,8 +151,14 @@ Configure o Apache para apontar para `public/` e acesse:
 - `POST /operational/desastres/seguranca`
 - `POST /operational/desastres/desmobilizacao`
 - `GET /operational/relatorios/basico`
+- `GET /operational/relatorios/avancado`
+- `GET /operational/inteligencia`
+- `GET /operational/documentos`
+- `POST /operational/documentos/upload`
+- `GET /operational/governanca`
+- `POST /operational/governanca/termo-aceite`
 
-## Observacoes da Fase 3
+## Observacoes da Fase 4
 
 - O login agora valida:
   - `status_usuario = ATIVO`
@@ -171,6 +183,23 @@ Configure o Apache para apontar para `public/` e acesse:
   - `GET /api/territorios/municipios?uf=TO&q=pal`
   - protegido por autenticacao e escopo UF.
   - cache backend por `UF+prefixo` em `storage/cache/territory` para reduzir carga de consulta.
+- As rotas de Fase 4 validam:
+  - modulo contratado `INTELLIGENCE`, `DOCUMENTS`, `GOVERNANCE` e `ADV_REPORTS`;
+  - perfil operacional permitido por politica de acesso;
+  - escopo institucional (conta/orgao/unidade) em consultas e anexos sensiveis;
+  - registro de auditoria para bloqueios de acesso e aceite de termo.
+- Documentos operacionais:
+  - upload com CSRF + protecao de duplo submit;
+  - validacao de MIME/tamanho no backend;
+  - persistencia em `storage/attachments/{conta}/{orgao}/...` com hash SHA-256;
+  - vinculo obrigatorio por entidade operacional em escopo.
+- Governanca operacional:
+  - aceite do termo vigente configurado em `config/governance.php`;
+  - trilha de logs e frequencia de acoes criticas;
+  - historico de aceites por usuario/versao.
+- Relatorio operacional avancado:
+  - consolidacao de tendencia, hotspots, frequencia auditada e anexos por entidade;
+  - registro de execucao em `relatorios_avancados_execucoes`.
 
 ## CI (GitHub Actions)
 

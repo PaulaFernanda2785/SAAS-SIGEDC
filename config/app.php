@@ -16,6 +16,10 @@ return [
         'operational.access' => App\Middleware\CheckOperationalAccess::class,
         'plancon.access' => App\Middleware\CheckPlanconAccess::class,
         'disaster.access' => App\Middleware\CheckDisasterExpansionAccess::class,
+        'intelligence.access' => App\Middleware\CheckIntelligenceAccess::class,
+        'documents.access' => App\Middleware\CheckDocumentsAccess::class,
+        'governance.access' => App\Middleware\CheckGovernanceAccess::class,
+        'advanced.reports.access' => App\Middleware\CheckAdvancedReportsAccess::class,
         'csrf' => App\Middleware\VerifyCsrfToken::class,
     ],
 ];

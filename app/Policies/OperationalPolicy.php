@@ -91,6 +91,63 @@ final class OperationalPolicy
         return $this->canAccessDisasterExpansion($profiles);
     }
 
+    public function canAccessIntelligence(array $profiles): bool
+    {
+        return $this->hasAnyProfile($profiles, [
+            UserProfile::GESTOR,
+            UserProfile::COORDENADOR,
+            UserProfile::ANALISTA,
+            UserProfile::OPERADOR,
+            UserProfile::LEITOR,
+        ]);
+    }
+
+    public function canAccessDocuments(array $profiles): bool
+    {
+        return $this->hasAnyProfile($profiles, [
+            UserProfile::GESTOR,
+            UserProfile::COORDENADOR,
+            UserProfile::ANALISTA,
+            UserProfile::OPERADOR,
+            UserProfile::LEITOR,
+        ]);
+    }
+
+    public function canUploadDocuments(array $profiles): bool
+    {
+        return $this->hasAnyProfile($profiles, [
+            UserProfile::GESTOR,
+            UserProfile::COORDENADOR,
+            UserProfile::ANALISTA,
+            UserProfile::OPERADOR,
+        ]);
+    }
+
+    public function canAccessGovernance(array $profiles): bool
+    {
+        return $this->hasAnyProfile($profiles, [
+            UserProfile::GESTOR,
+            UserProfile::COORDENADOR,
+            UserProfile::ANALISTA,
+        ]);
+    }
+
+    public function canAcceptGovernanceTerm(array $profiles): bool
+    {
+        return $this->canAccessGovernance($profiles);
+    }
+
+    public function canAccessAdvancedReports(array $profiles): bool
+    {
+        return $this->hasAnyProfile($profiles, [
+            UserProfile::GESTOR,
+            UserProfile::COORDENADOR,
+            UserProfile::ANALISTA,
+            UserProfile::OPERADOR,
+            UserProfile::LEITOR,
+        ]);
+    }
+
     private function hasAnyProfile(array $profiles, array $allowed): bool
     {
         foreach ($profiles as $profile) {

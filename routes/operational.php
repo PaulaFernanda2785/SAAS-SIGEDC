@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 use App\Controllers\Operational\DashboardController;
 use App\Controllers\Operational\DisasterController;
+use App\Controllers\Operational\DocumentController;
+use App\Controllers\Operational\GovernanceController;
 use App\Controllers\Operational\IncidentController;
+use App\Controllers\Operational\IntelligenceController;
 use App\Controllers\Operational\PlanconController;
 use App\Controllers\Operational\ReportController;
 
 $operationalMiddleware = ['authenticate', 'area.operational', 'operational.access'];
 $planconMiddleware = ['authenticate', 'area.operational', 'operational.access', 'plancon.access'];
 $disasterMiddleware = ['authenticate', 'area.operational', 'operational.access', 'disaster.access'];
+$intelligenceMiddleware = ['authenticate', 'area.operational', 'operational.access', 'intelligence.access'];
+$documentsMiddleware = ['authenticate', 'area.operational', 'operational.access', 'documents.access'];
+$governanceMiddleware = ['authenticate', 'area.operational', 'operational.access', 'governance.access'];
+$advancedReportsMiddleware = ['authenticate', 'area.operational', 'operational.access', 'advanced.reports.access'];
 
 $router->get('/operational', [DashboardController::class, 'index'], $operationalMiddleware);
 
@@ -37,3 +44,12 @@ $router->post('/operational/desastres/seguranca', [DisasterController::class, 's
 $router->post('/operational/desastres/desmobilizacao', [DisasterController::class, 'storeDemobilization'], ['authenticate', 'area.operational', 'operational.access', 'disaster.access', 'csrf']);
 
 $router->get('/operational/relatorios/basico', [ReportController::class, 'basic'], $operationalMiddleware);
+$router->get('/operational/relatorios/avancado', [ReportController::class, 'advanced'], $advancedReportsMiddleware);
+
+$router->get('/operational/inteligencia', [IntelligenceController::class, 'index'], $intelligenceMiddleware);
+
+$router->get('/operational/documentos', [DocumentController::class, 'index'], $documentsMiddleware);
+$router->post('/operational/documentos/upload', [DocumentController::class, 'upload'], ['authenticate', 'area.operational', 'operational.access', 'documents.access', 'csrf']);
+
+$router->get('/operational/governanca', [GovernanceController::class, 'index'], $governanceMiddleware);
+$router->post('/operational/governanca/termo-aceite', [GovernanceController::class, 'acceptTerm'], ['authenticate', 'area.operational', 'operational.access', 'governance.access', 'csrf']);
