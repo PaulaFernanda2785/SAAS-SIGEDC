@@ -80,6 +80,22 @@ final class CommercialRepository
         return $statement->fetchAll();
     }
 
+    public function planByCode(string $codigoPlano): ?array
+    {
+        $statement = $this->pdo()->prepare(
+            'SELECT id, codigo_plano, nome_plano, descricao, preco_mensal, limite_usuarios, status_plano
+             FROM planos_catalogo
+             WHERE UPPER(codigo_plano) = :codigo_plano
+             LIMIT 1'
+        );
+        $statement->execute([
+            'codigo_plano' => strtoupper(trim($codigoPlano)),
+        ]);
+        $row = $statement->fetch();
+
+        return $row !== false ? $row : null;
+    }
+
     public function createAssinatura(array $data): int
     {
         $statement = $this->pdo()->prepare(
@@ -111,6 +127,25 @@ final class CommercialRepository
              LIMIT 1'
         );
         $statement->execute(['id' => $assinaturaId]);
+        $row = $statement->fetch();
+
+        return $row !== false ? $row : null;
+    }
+
+    public function latestAssinaturaByConta(int $contaId): ?array
+    {
+        if (!$this->tableExists('assinaturas')) {
+            return null;
+        }
+
+        $statement = $this->pdo()->prepare(
+            'SELECT id, conta_id, uf_sigla, plano_id, status_assinatura, inicia_em, expira_em, trial_fim_em, motivo_status
+             FROM assinaturas
+             WHERE conta_id = :conta_id
+             ORDER BY id DESC
+             LIMIT 1'
+        );
+        $statement->execute(['conta_id' => $contaId]);
         $row = $statement->fetch();
 
         return $row !== false ? $row : null;
@@ -192,7 +227,7 @@ final class CommercialRepository
         }
 
         $statement = $this->pdo()->prepare(
-            'SELECT a.id, a.uf_sigla, a.status_assinatura, a.inicia_em, a.expira_em,
+            'SELECT a.id, a.uf_sigla, a.status_assinatura, a.inicia_em, a.expira_em, a.trial_fim_em, a.motivo_status,
                     SUM(CASE WHEN m.codigo_modulo = \'AUTH\' AND am.status_liberacao = \'ATIVA\' THEN 1 ELSE 0 END) AS auth_liberado
              FROM assinaturas a
              LEFT JOIN assinaturas_modulos am ON am.assinatura_id = a.id
@@ -201,7 +236,7 @@ final class CommercialRepository
                AND a.status_assinatura IN (\'TRIAL\', \'ATIVA\')
                AND a.inicia_em <= CURDATE()
                AND (a.expira_em IS NULL OR a.expira_em >= CURDATE())
-             GROUP BY a.id, a.status_assinatura, a.inicia_em, a.expira_em
+             GROUP BY a.id, a.status_assinatura, a.inicia_em, a.expira_em, a.trial_fim_em, a.motivo_status
              ORDER BY a.id DESC
              LIMIT 1'
         );
@@ -229,6 +264,53 @@ final class CommercialRepository
         $rows = $statement->fetchAll();
 
         return array_map(static fn(array $row): string => (string) $row['codigo_modulo'], $rows);
+    }
+
+    public function moduleIdsByCodes(array $codes): array
+    {
+        if ($codes === []) {
+            return [];
+        }
+
+        $normalizedCodes = [];
+        foreach ($codes as $code) {
+            $normalized = strtoupper(trim((string) $code));
+            if ($normalized !== '') {
+                $normalizedCodes[] = $normalized;
+            }
+        }
+
+        if ($normalizedCodes === []) {
+            return [];
+        }
+
+        $placeholders = [];
+        $params = [];
+        foreach (array_values(array_unique($normalizedCodes)) as $index => $code) {
+            $param = ':code_' . $index;
+            $placeholders[] = $param;
+            $params['code_' . $index] = $code;
+        }
+
+        $statement = $this->pdo()->prepare(
+            'SELECT id, codigo_modulo
+             FROM modulos
+             WHERE codigo_modulo IN (' . implode(', ', $placeholders) . ')'
+        );
+        $statement->execute($params);
+
+        $rows = $statement->fetchAll();
+        $result = [];
+        foreach ($rows as $row) {
+            $code = strtoupper((string) ($row['codigo_modulo'] ?? ''));
+            if ($code === '') {
+                continue;
+            }
+
+            $result[$code] = (int) ($row['id'] ?? 0);
+        }
+
+        return $result;
     }
 
     private function applyUfWhere(string $alias, ?string $ufSigla, array &$where, array &$params): void

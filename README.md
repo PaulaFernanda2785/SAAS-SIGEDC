@@ -54,6 +54,7 @@ source database/schema/004_phase3_plancon_disaster_expansion.sql;
 source database/schema/005_phase3_uf_territorios.sql;
 source database/schema/006_phase4_intelligence_documents_governance.sql;
 source database/schema/007_phase5_enterprise_scale_integrations.sql;
+source database/schema/008_phase5_public_onboarding_billing.sql;
 ```
 
 5. Execute os seeds:
@@ -66,6 +67,7 @@ source database/seeds/004_phase3_seed.sql;
 source database/seeds/005_phase3_uf_seed.sql;
 source database/seeds/006_phase4_seed.sql;
 source database/seeds/007_phase5_seed.sql;
+source database/seeds/008_phase5_launch_pricing_seed.sql;
 ```
 
 6. Opcional: gere autoload do Composer:
@@ -113,6 +115,10 @@ Configure o Apache para apontar para `public/` e acesse:
 - `GET /`
 - `GET /planos`
 - `GET /demonstracao`
+- `POST /demonstracao/trial`
+- `POST /demonstracao/assinar`
+- `GET /checkout`
+- `POST /checkout/confirmar`
 - `GET /login`
 - `POST /login`
 - `GET /forgot-password`
@@ -200,9 +206,25 @@ Configure o Apache para apontar para `public/` e acesse:
 - Endpoint de autocomplete territorial:
   - `GET /api/territorios/ufs`
   - `GET /api/territorios/municipios?uf=TO&q=pal`
+  - `GET /api/public/territorios/ufs`
+  - `GET /api/public/territorios/municipios?uf=TO&q=pal`
+  - `POST /api/pagamentos/mercadopago/webhook`
   - `GET /api/enterprise/executivo` (header `X-Api-Key` ou `Authorization: Bearer ...`)
   - protegido por autenticacao e escopo UF.
   - cache backend por `UF+prefixo` em `storage/cache/territory` para reduzir carga de consulta.
+- Onboarding publico comercial:
+  - demonstracao por 3 dias com cadastro institucional e perfil `LEITOR`;
+  - bloqueio backend de operacoes POST para contas em trial demonstrativo;
+  - assinatura direta com checkout, fatura pendente e ativacao apos pagamento.
+- Faturamento e pagamento:
+  - tabelas `assinaturas_faturas` e `assinaturas_pagamentos`;
+  - gateway Mercado Pago via `.env`, sem hardcode de credenciais;
+  - meios previstos no checkout: PIX, cartao de credito e cartao de debito;
+  - modo de fallback local controlado por `PAYMENTS_ALLOW_LOCAL_FALLBACK` (recomendado `false` em producao);
+  - fluxo de webhook preparado para atualizacao de status.
+- Mensagens contratuais no login:
+  - trial demonstrativo expirado (orienta selecionar plano e pagar);
+  - assinatura aguardando pagamento no fluxo publico.
 - As rotas de Fase 4 validam:
   - modulo contratado `INTELLIGENCE`, `DOCUMENTS`, `GOVERNANCE` e `ADV_REPORTS`;
   - perfil operacional permitido por politica de acesso;
@@ -242,6 +264,7 @@ Configure o Apache para apontar para `public/` e acesse:
   - executa matriz PHP 8.3 e 8.4
   - aplica `database/schema/*.sql` e `database/seeds/*.sql`
   - executa `php tests/integration/uf_context_integration_test.php`
+  - executa `php tests/integration/public_onboarding_integration_test.php`
   - executa `php tests/integration/phase4_operational_integration_test.php`
   - executa `php tests/integration/report_export_integration_test.php`
   - executa `php tests/integration/phase5_enterprise_integration_test.php`

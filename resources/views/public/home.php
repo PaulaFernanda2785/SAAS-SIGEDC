@@ -11,8 +11,8 @@ declare(strict_types=1);
             com rastreabilidade completa desde a prevencao ate a resposta ao desastre.
         </p>
         <div class="landing-actions reveal-cascade-item" style="--reveal-delay: 0.52s;">
-            <a class="button" href="<?= e(url('/demonstracao')) ?>">Solicitar demonstracao</a>
-            <a class="button button-secondary" href="<?= e(url('/planos')) ?>">Conhecer planos</a>
+            <a class="button" href="<?= e(url('/planos')) ?>">Escolher o melhor plano</a>
+            <a class="button button-secondary" href="<?= e(url('/#funcionalidades')) ?>">Conhecer funcionalidades</a>
         </div>
         <div class="landing-metrics reveal-on-scroll" style="--reveal-delay: 0.64s;">
             <article class="reveal-cascade-item" style="--reveal-delay: 0.10s;">
@@ -53,32 +53,32 @@ declare(strict_types=1);
 </section>
 
 <section class="container landing-section" id="funcionalidades">
-    <header class="landing-section-header">
-        <span>Funcionalidades centrais</span>
-        <h2>Objetividade operacional sem perder controle tecnico</h2>
+    <header class="landing-section-header reveal-on-scroll">
+        <span class="reveal-cascade-item" style="--reveal-delay: 0.08s;">Funcionalidades centrais</span>
+        <h2 class="reveal-cascade-item" style="--reveal-delay: 0.2s;">Objetividade operacional sem perder controle tecnico</h2>
     </header>
-    <div class="landing-grid-2">
-        <article class="landing-feature">
+    <div class="landing-grid-2 reveal-on-scroll">
+        <article class="landing-feature reveal-cascade-item" style="--reveal-delay: 0.12s;">
             <h3>Trilha de auditoria e conformidade</h3>
             <p>Registro de acoes criticas com escopo institucional, responsavel, origem e resultado.</p>
         </article>
-        <article class="landing-feature">
+        <article class="landing-feature reveal-cascade-item" style="--reveal-delay: 0.24s;">
             <h3>Controle contratual e modulos</h3>
             <p>Liberacao de capacidades por assinatura, com bloqueio seguro no backend.</p>
         </article>
-        <article class="landing-feature">
+        <article class="landing-feature reveal-cascade-item" style="--reveal-delay: 0.36s;">
             <h3>Escopo territorial por UF</h3>
             <p>Consulta e cadastro respeitando UF de origem e perfil, com excecao segura para ADMIN_MASTER.</p>
         </article>
-        <article class="landing-feature">
+        <article class="landing-feature reveal-cascade-item" style="--reveal-delay: 0.48s;">
             <h3>API e integracoes enterprise</h3>
             <p>Consumo controlado por chave, escopos definidos e validacao de modulo contratado.</p>
         </article>
     </div>
 </section>
 
-<section class="container landing-cta-strip">
-    <h2>Pronto para evoluir a maturidade institucional da sua operacao?</h2>
-    <p>Agende uma demonstracao e valide o SIGERD com seu cenario real de governanca e resposta.</p>
-    <a class="button" href="<?= e(url('/demonstracao')) ?>">Agendar demonstracao</a>
+<section class="container landing-cta-strip reveal-on-scroll">
+    <h2 class="reveal-cascade-item" style="--reveal-delay: 0.12s;">Pronto para evoluir a maturidade institucional da sua operacao?</h2>
+    <p class="reveal-cascade-item" style="--reveal-delay: 0.24s;">Compare os planos mensais e anuais e escolha a melhor combinacao para iniciar sua operacao com seguranca e escalabilidade.</p>
+    <a class="button reveal-cascade-item" href="<?= e(url('/planos')) ?>" style="--reveal-delay: 0.36s;">Escolher o melhor plano</a>
 </section>

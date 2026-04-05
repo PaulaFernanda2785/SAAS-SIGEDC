@@ -157,6 +157,7 @@ final class AuthService
                 'status_assinatura' => $contractCheck['assinatura']['status_assinatura'] ?? null,
                 'modulos_liberados' => $contractCheck['modulos_liberados'] ?? [],
                 'escopos' => $scopes,
+                'is_demo_trial' => $this->isDemoTrial($contractCheck['assinatura'] ?? []),
             ]
         );
 
@@ -235,5 +236,13 @@ final class AuthService
         $auth = $_SESSION['auth'] ?? null;
 
         return is_array($auth) ? $auth : null;
+    }
+
+    private function isDemoTrial(array $contract): bool
+    {
+        $status = strtoupper((string) ($contract['status_assinatura'] ?? ''));
+        $reason = strtoupper((string) ($contract['motivo_status'] ?? ''));
+
+        return $status === 'TRIAL' && str_contains($reason, 'TRIAL_DEMO_PUBLICO_3_DIAS');
     }
 }

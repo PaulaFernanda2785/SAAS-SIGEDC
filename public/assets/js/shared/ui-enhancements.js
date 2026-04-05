@@ -10,7 +10,10 @@
     return Math.ceil(header.getBoundingClientRect().height);
   };
 
-  const scrollToHash = (hash) => {
+  const prefersReducedMotion = () =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const scrollToHash = (hash, behavior = 'smooth') => {
     if (!hash || hash === '#') {
       return;
     }
@@ -22,7 +25,7 @@
 
     const offset = getHeaderOffset() + 12;
     const top = window.scrollY + target.getBoundingClientRect().top - offset;
-    window.scrollTo({ top, behavior: 'smooth' });
+    window.scrollTo({ top, behavior: prefersReducedMotion() ? 'auto' : behavior });
   };
 
   const initSmoothScroll = () => {
@@ -45,12 +48,16 @@
 
         event.preventDefault();
         history.replaceState(null, '', url.hash);
-        scrollToHash(url.hash);
+        scrollToHash(url.hash, 'smooth');
       });
     });
 
     if (window.location.hash) {
-      window.setTimeout(() => scrollToHash(window.location.hash), 80);
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          scrollToHash(window.location.hash, 'auto');
+        });
+      });
     }
   };
 
@@ -181,17 +188,11 @@
   };
 
   const initRevealEffects = () => {
-    const targets = document.querySelectorAll(
-      '.landing-hero-inner, .landing-section-header, .landing-grid-3, .landing-grid-2, .landing-metrics, .landing-cta-strip, .table-card, .auth-card'
-    );
+    const targets = document.querySelectorAll('.reveal-on-scroll');
 
     if (targets.length === 0) {
       return;
     }
-
-    targets.forEach((target) => {
-      target.classList.add('reveal-on-scroll');
-    });
 
     targets.forEach((target) => {
       let order = 0;
@@ -220,7 +221,7 @@
       });
     };
 
-    if (!('IntersectionObserver' in window)) {
+    if (!('IntersectionObserver' in window) || prefersReducedMotion()) {
       targets.forEach((target) => {
         activateReveal(target);
       });

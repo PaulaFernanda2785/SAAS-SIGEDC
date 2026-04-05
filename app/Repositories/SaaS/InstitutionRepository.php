@@ -280,6 +280,28 @@ final class InstitutionRepository
         return $statement->fetchAll();
     }
 
+    public function profileIdByName(string $profileName): ?int
+    {
+        $statement = $this->pdo()->prepare(
+            'SELECT id
+             FROM perfis
+             WHERE nome_perfil = :nome_perfil
+               AND status_perfil = \'ATIVO\'
+             LIMIT 1'
+        );
+        $statement->execute([
+            'nome_perfil' => trim($profileName),
+        ]);
+
+        $id = $statement->fetchColumn();
+        if ($id === false) {
+            return null;
+        }
+
+        $value = (int) $id;
+        return $value > 0 ? $value : null;
+    }
+
     public function vincularPerfilAoUsuario(int $usuarioId, int $perfilId): void
     {
         $statement = $this->pdo()->prepare(

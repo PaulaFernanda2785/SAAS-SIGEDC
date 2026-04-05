@@ -20,8 +20,10 @@ if (
 
 $isHome = $uriPath === '/';
 $isPlans = $uriPath === '/planos';
-$isDemo = $uriPath === '/demonstracao';
 $isLogin = in_array($uriPath, ['/login', '/acessar-plataforma', '/forgot-password', '/reset-password'], true);
+$isLoginAccessPage = in_array($uriPath, ['/login', '/acessar-plataforma'], true);
+$authAccessNavClass = trim('public-nav-access ' . ($isLogin ? 'is-active' : ''));
+$authWrapperClass = 'container auth-wrapper' . ($isLoginAccessPage ? ' auth-wrapper--login' : '');
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -65,9 +67,10 @@ $isLogin = in_array($uriPath, ['/login', '/acessar-plataforma', '/forgot-passwor
 
         <nav id="auth-main-nav" class="public-nav" aria-label="Menu principal" data-nav-track>
             <a class="<?= $isHome ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>">Inicio</a>
+            <a href="<?= e(url('/#solucao')) ?>">Solucao</a>
+            <a href="<?= e(url('/#funcionalidades')) ?>">Funcionalidades</a>
             <a class="<?= $isPlans ? 'is-active' : '' ?>" href="<?= e(url('/planos')) ?>">Planos</a>
-            <a class="<?= $isDemo ? 'is-active' : '' ?>" href="<?= e(url('/demonstracao')) ?>">Demonstracao</a>
-            <a class="<?= $isLogin ? 'is-active' : '' ?>" href="<?= e(url('/acessar-plataforma')) ?>">Acessar plataforma</a>
+            <a class="<?= e($authAccessNavClass) ?>" href="<?= e(url('/acessar-plataforma')) ?>">Acessar plataforma</a>
         </nav>
 
         <div class="public-head-actions">
@@ -78,7 +81,7 @@ $isLogin = in_array($uriPath, ['/login', '/acessar-plataforma', '/forgot-passwor
 </header>
 
 <main class="public-main auth-main-shell">
-    <section class="container auth-wrapper">
+    <section class="<?= e($authWrapperClass) ?>">
         <?php if (isset($flash['error'])): ?>
             <div class="alert alert-error"><?= e((string) $flash['error']) ?></div>
         <?php endif; ?>
@@ -105,7 +108,6 @@ $isLogin = in_array($uriPath, ['/login', '/acessar-plataforma', '/forgot-passwor
         <div class="public-footer-links">
             <a href="<?= e(url('/')) ?>">Inicio</a>
             <a href="<?= e(url('/planos')) ?>">Planos</a>
-            <a href="<?= e(url('/demonstracao')) ?>">Demonstracao</a>
             <a href="<?= e(url('/acessar-plataforma')) ?>">Acessar plataforma</a>
         </div>
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Auth;
 
 use App\Repositories\SaaS\CommercialRepository;
+use DateTimeImmutable;
 use Throwable;
 
 final class ContractAccessService
@@ -20,6 +21,36 @@ final class ContractAccessService
             $contract = $commercialRepository->contractForAuth($contaId);
 
             if ($contract === null) {
+                $latestAssinatura = $commercialRepository->latestAssinaturaByConta($contaId);
+                if ($latestAssinatura !== null) {
+                    $latestStatus = strtoupper((string) ($latestAssinatura['status_assinatura'] ?? ''));
+                    $latestReason = strtoupper((string) ($latestAssinatura['motivo_status'] ?? ''));
+
+                    if (
+                        $latestStatus === 'TRIAL'
+                        && str_contains($latestReason, 'TRIAL_DEMO_PUBLICO_3_DIAS')
+                        && $this->isExpiredDate((string) ($latestAssinatura['expira_em'] ?? ''))
+                    ) {
+                        $expiresAt = (string) ($latestAssinatura['expira_em'] ?? '');
+                        return [
+                            'ok' => false,
+                            'reason' => 'trial_demo_expirado',
+                            'message' => 'Periodo de demonstracao encerrado em ' . ($expiresAt !== '' ? $expiresAt : 'data indisponivel') . '. Para continuar, escolha um plano em /planos e conclua a assinatura/pagamento.',
+                        ];
+                    }
+
+                    if (
+                        $latestStatus === 'SUSPENSA'
+                        && str_contains($latestReason, 'AGUARDANDO_PAGAMENTO_PORTAL_PUBLICO')
+                    ) {
+                        return [
+                            'ok' => false,
+                            'reason' => 'assinatura_aguardando_pagamento',
+                            'message' => 'Cadastro encontrado com assinatura pendente de pagamento. Finalize o checkout para liberar o acesso.',
+                        ];
+                    }
+                }
+
                 return [
                     'ok' => false,
                     'reason' => 'assinatura_ausente_ou_inativa',
@@ -49,6 +80,22 @@ final class ContractAccessService
                 'reason' => 'contrato_indisponivel',
                 'message' => 'Nao foi possivel validar a situacao contratual.',
             ];
+        }
+    }
+
+    private function isExpiredDate(string $date): bool
+    {
+        $date = trim($date);
+        if ($date === '') {
+            return false;
+        }
+
+        try {
+            $target = new DateTimeImmutable($date);
+            $today = new DateTimeImmutable('today');
+            return $target < $today;
+        } catch (Throwable) {
+            return false;
         }
     }
 }

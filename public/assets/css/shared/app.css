@@ -28,7 +28,7 @@
 }
 
 html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
 }
 
 body {
@@ -205,8 +205,88 @@ textarea {
     width: min(520px, 92vw);
 }
 
+.auth-wrapper--login {
+    width: min(1180px, 94vw);
+}
+
 .auth-card {
     margin-top: 0.75rem;
+}
+
+.auth-login-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 1rem;
+    align-items: stretch;
+    margin-top: 0.75rem;
+}
+
+.auth-login-intro {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    padding: 1.6rem 1.4rem;
+    color: #eff8ff;
+    background:
+        linear-gradient(120deg, rgba(7, 39, 70, 0.96) 0%, rgba(9, 54, 94, 0.9) 48%, rgba(16, 94, 146, 0.86) 100%),
+        url("../../img/SIGERD-hero.png") center center / cover no-repeat;
+    border: 1px solid rgba(156, 203, 245, 0.4);
+    box-shadow: 0 20px 38px rgba(8, 35, 66, 0.24);
+}
+
+.auth-login-intro .landing-badge {
+    margin-bottom: 0.8rem;
+}
+
+.auth-login-intro h1 {
+    margin: 0 0 0.8rem;
+    font-family: "Space Grotesk", "Manrope", sans-serif;
+    font-size: clamp(1.35rem, 2.25vw, 2rem);
+    line-height: 1.12;
+}
+
+.auth-login-intro p {
+    margin: 0;
+    color: rgba(226, 241, 255, 0.96);
+    max-width: 560px;
+}
+
+.auth-login-highlights {
+    margin: 1rem 0 0;
+    padding-left: 1.05rem;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.auth-login-highlights li {
+    color: rgba(235, 246, 255, 0.98);
+}
+
+.auth-login-actions {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.auth-login-card {
+    margin-top: 0;
+    padding: 1.25rem;
+}
+
+.auth-login-card h2 {
+    margin: 0 0 0.45rem;
+    color: #153d69;
+    font-family: "Space Grotesk", "Manrope", sans-serif;
+    font-size: 1.4rem;
+}
+
+.auth-login-submit {
+    width: 100%;
+}
+
+.auth-login-help {
+    margin: 0.85rem 0 0;
 }
 
 .alert {
@@ -332,7 +412,7 @@ th {
 .public-header-inner {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(270px, 1fr) auto auto;
+    grid-template-columns: minmax(420px, 1fr) auto auto;
     align-items: center;
     gap: 0.85rem;
     min-height: 138px;
@@ -348,9 +428,9 @@ th {
 
 .public-brand {
     display: inline-flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.3rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.7rem;
     text-decoration: none;
     color: #1a2945;
     min-width: 0;
@@ -358,29 +438,33 @@ th {
 }
 
 .public-brand-logo {
-    width: clamp(200px, 16vw, 290px);
+    width: clamp(150px, 12vw, 210px);
     height: auto;
-    max-height: 98px;
+    max-height: 80px;
     flex-shrink: 0;
     object-fit: contain;
     display: block;
 }
 
 .public-brand-text {
-    display: block;
+    display: inline-flex;
+    align-items: center;
     min-width: 0;
-    max-width: clamp(200px, 16vw, 290px);
+    max-width: min(100%, 740px);
 }
 
 .public-brand-text strong {
     font-family: "Space Grotesk", "Manrope", sans-serif;
-    font-size: clamp(0.7rem, 0.84vw, 0.82rem);
+    font-size: clamp(0.72rem, 0.92vw, 0.92rem);
     letter-spacing: 0.02em;
-    line-height: 1.2;
+    line-height: 1.15;
     max-width: 100%;
     display: block;
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: normal;
+    overflow-wrap: normal;
 }
 
 .public-brand-text small {
@@ -676,6 +760,32 @@ th {
     color: rgba(230, 245, 255, 0.95);
 }
 
+.onboarding-summary-card {
+    margin-top: 0.6rem;
+}
+
+.onboarding-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 0.8rem;
+}
+
+.onboarding-grid {
+    margin-top: 0.9rem;
+}
+
+.onboarding-card {
+    padding-bottom: 1.2rem;
+}
+
+.onboarding-form .checkbox-line {
+    margin-top: 0.25rem;
+}
+
+.checkout-card {
+    max-width: 860px;
+}
+
 /* Public Footer */
 .public-footer {
     border-top: 1px solid #cfdaea;
@@ -684,22 +794,22 @@ th {
 
 .public-footer-inner {
     display: grid;
-    grid-template-columns: minmax(0, 1.45fr) minmax(150px, 1fr) minmax(180px, 1fr);
+    grid-template-columns: minmax(0, 2fr) minmax(150px, 0.8fr) minmax(180px, 0.8fr);
     gap: 1.2rem;
     padding: 1.4rem 0;
 }
 
 .public-footer-brand {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.45rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.8rem;
 }
 
 .public-footer-logo {
-    width: clamp(150px, 12vw, 220px);
+    width: clamp(130px, 10vw, 180px);
     height: auto;
-    max-height: 86px;
+    max-height: 72px;
     flex-shrink: 0;
     object-fit: contain;
     display: block;
@@ -707,7 +817,7 @@ th {
 
 .public-footer-copy {
     min-width: 0;
-    max-width: 360px;
+    max-width: 720px;
 }
 
 .public-footer-brand p {
@@ -720,11 +830,23 @@ th {
     display: block;
     color: #1a355b;
     font-family: "Space Grotesk", "Manrope", sans-serif;
-    font-size: clamp(0.78rem, 0.98vw, 0.94rem);
-    line-height: 1.28;
+    font-size: clamp(0.76rem, 0.9vw, 0.92rem);
+    line-height: 1.2;
     max-width: 100%;
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: normal;
+    overflow-wrap: normal;
+}
+
+.onboarding-flow-lines {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.onboarding-flow-lines p {
+    margin: 0;
 }
 
 .public-footer-links {
@@ -927,7 +1049,7 @@ th {
 /* Responsive */
 @media (max-width: 1180px) {
     .public-header-inner {
-        grid-template-columns: minmax(240px, 1fr) auto auto;
+        grid-template-columns: minmax(320px, 1fr) auto auto;
         min-height: 126px;
     }
 
@@ -937,7 +1059,7 @@ th {
     }
 
     .public-brand-text strong {
-        font-size: 0.67rem;
+        font-size: 0.66rem;
     }
 
     .app-version {
@@ -949,13 +1071,17 @@ th {
     }
 
     .public-footer-inner {
-        grid-template-columns: 1.3fr 1fr 1fr;
+        grid-template-columns: 1.6fr 1fr 1fr;
     }
 }
 
 @media (max-width: 1080px) {
+    .public-brand-text {
+        max-width: clamp(300px, 34vw, 430px);
+    }
+
     .public-brand-text strong {
-        font-size: 0.64rem;
+        font-size: 0.62rem;
     }
 }
 
@@ -968,6 +1094,10 @@ th {
 
     .public-header-inner {
         grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .auth-login-shell {
+        grid-template-columns: 1fr;
     }
 
     .menu-toggle {
@@ -1116,6 +1246,7 @@ th {
     .landing-metrics,
     .landing-grid-3,
     .landing-grid-2,
+    .onboarding-summary-grid,
     .grid,
     .grid-2 {
         grid-template-columns: 1fr;

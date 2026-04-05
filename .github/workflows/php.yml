@@ -79,6 +79,9 @@ jobs:
       - name: Run integration test (UF context + API territorial)
         run: php tests/integration/uf_context_integration_test.php
 
+      - name: Run integration test (Public onboarding)
+        run: php tests/integration/public_onboarding_integration_test.php
+
       - name: Run integration test (Phase 4 operational)
         run: php tests/integration/phase4_operational_integration_test.php
 

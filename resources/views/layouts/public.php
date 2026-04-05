@@ -20,7 +20,6 @@ if (
 
 $isHome = $uriPath === '/';
 $isPlans = $uriPath === '/planos';
-$isDemo = $uriPath === '/demonstracao';
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -33,6 +32,9 @@ $isDemo = $uriPath === '/demonstracao';
     <link rel="apple-touch-icon" sizes="180x180" href="<?= e(url('/assets/img/favicon-sigerd.png')) ?>">
     <link rel="shortcut icon" type="image/png" href="<?= e(url('/assets/img/favicon-sigerd.png')) ?>">
     <link rel="stylesheet" href="<?= e(url('/assets/css/shared/app.css')) ?>">
+    <?php if ($isPlans): ?>
+        <link rel="stylesheet" href="<?= e(url('/assets/css/public/plans.css')) ?>">
+    <?php endif; ?>
 </head>
 <body class="public-body">
 <header class="public-header">
@@ -67,7 +69,6 @@ $isDemo = $uriPath === '/demonstracao';
             <a href="<?= e(url('/#solucao')) ?>">Solucao</a>
             <a href="<?= e(url('/#funcionalidades')) ?>">Funcionalidades</a>
             <a class="<?= $isPlans ? 'is-active' : '' ?>" href="<?= e(url('/planos')) ?>">Planos</a>
-            <a class="<?= $isDemo ? 'is-active' : '' ?>" href="<?= e(url('/demonstracao')) ?>">Demonstracao</a>
             <a class="public-nav-access" href="<?= e(url('/acessar-plataforma')) ?>">Acessar plataforma</a>
         </nav>
 
@@ -107,7 +108,6 @@ $isDemo = $uriPath === '/demonstracao';
         <div class="public-footer-links">
             <a href="<?= e(url('/')) ?>">Inicio</a>
             <a href="<?= e(url('/planos')) ?>">Planos</a>
-            <a href="<?= e(url('/demonstracao')) ?>">Demonstracao</a>
             <a href="<?= e(url('/acessar-plataforma')) ?>">Acessar plataforma</a>
         </div>
 
@@ -121,6 +121,7 @@ $isDemo = $uriPath === '/demonstracao';
 <button type="button" class="scroll-top-btn" data-scroll-top aria-label="Voltar ao topo">
     <span aria-hidden="true">&#8593;</span>
 </button>
+<script src="<?= e(url('/assets/js/shared/form-guard.js')) ?>" defer></script>
 <script src="<?= e(url('/assets/js/shared/ui-enhancements.js')) ?>" defer></script>
 </body>
 </html>
