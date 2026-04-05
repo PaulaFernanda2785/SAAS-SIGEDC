@@ -33,6 +33,6 @@ $token = $token ?? '';
     </form>
 
     <p class="muted">
-        <a href="<?= e(url('/login')) ?>">Voltar ao login</a>
+        <a href="<?= e(url('/acessar-plataforma')) ?>">Voltar ao login</a>
     </p>
 </section>

@@ -9,6 +9,7 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
     'base_path' => env('APP_BASE_PATH', ''),
     'timezone' => env('APP_TIMEZONE', 'America/Fortaleza'),
+    'version' => env('APP_VERSION', '1.0.0'),
     'middleware_aliases' => [
         'authenticate' => App\Middleware\Authenticate::class,
         'area.admin' => App\Middleware\CheckAdminArea::class,
