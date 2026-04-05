@@ -51,4 +51,23 @@ final class DocumentController
 
         return Response::redirect('/operational/documentos');
     }
+
+    public function download(Request $request): Response
+    {
+        $attachmentId = (int) $request->input('anexo_id', 0);
+        $result = ($this->service ?? new OperationalDocumentService())
+            ->download($_SESSION['auth'] ?? [], $attachmentId, $request);
+
+        if (($result['ok'] ?? false) !== true) {
+            Flash::set('error', (string) ($result['message'] ?? 'Falha ao baixar documento.'));
+            return Response::redirect('/operational/documentos');
+        }
+
+        return Response::file(
+            (string) $result['file_path'],
+            (string) $result['download_name'],
+            (string) $result['mime_type'],
+            false
+        );
+    }
 }

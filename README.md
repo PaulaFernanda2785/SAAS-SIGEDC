@@ -17,7 +17,9 @@ Esta entrega adiciona a Fase 4 sobre a fundacao das fases anteriores:
 - modulo PLANCON com blocos de risco, cenario, ativacao, recursos e revisao.
 - modulo de expansao de desastres com PAI, operacoes, planejamento, seguranca e desmobilizacao.
 - inteligencia operacional com hotspots, tendencia e pontos de mapa.
+- inteligencia operacional com motor de alertas ativos por regra.
 - documentos operacionais com upload auditado e vinculo por entidade.
+- documentos operacionais com download seguro por escopo institucional.
 - governanca operacional com aceite de termo, trilha de auditoria e conformidade.
 - relatorio operacional avancado com registro de execucao e consolidacao analitica.
 
@@ -154,6 +156,7 @@ Configure o Apache para apontar para `public/` e acesse:
 - `GET /operational/relatorios/avancado`
 - `GET /operational/inteligencia`
 - `GET /operational/documentos`
+- `GET /operational/documentos/download`
 - `POST /operational/documentos/upload`
 - `GET /operational/governanca`
 - `POST /operational/governanca/termo-aceite`
@@ -188,11 +191,16 @@ Configure o Apache para apontar para `public/` e acesse:
   - perfil operacional permitido por politica de acesso;
   - escopo institucional (conta/orgao/unidade) em consultas e anexos sensiveis;
   - registro de auditoria para bloqueios de acesso e aceite de termo.
+- Inteligencia operacional:
+  - motor de alertas com persistencia em `inteligencia_alertas_operacionais`;
+  - regras iniciais para concentracao de hotspots e atraso/ausencia de briefing;
+  - visao de alertas ativos no painel de inteligencia e no relatorio avancado.
 - Documentos operacionais:
   - upload com CSRF + protecao de duplo submit;
   - validacao de MIME/tamanho no backend;
   - persistencia em `storage/attachments/{conta}/{orgao}/...` com hash SHA-256;
-  - vinculo obrigatorio por entidade operacional em escopo.
+  - vinculo obrigatorio por entidade operacional em escopo;
+  - download seguro com verificacao de visibilidade/escopo e auditoria de acesso.
 - Governanca operacional:
   - aceite do termo vigente configurado em `config/governance.php`;
   - trilha de logs e frequencia de acoes criticas;

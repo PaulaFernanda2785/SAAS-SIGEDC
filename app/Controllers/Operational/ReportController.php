@@ -51,6 +51,7 @@ final class ReportController
             'hotspots' => $data['hotspots'],
             'auditFrequency' => $data['audit_frequency'],
             'documentsByEntity' => $data['documents_by_entity'],
+            'activeAlerts' => $data['active_alerts'],
             'recentExecutions' => $data['recent_executions'],
         ], 'operational');
     }

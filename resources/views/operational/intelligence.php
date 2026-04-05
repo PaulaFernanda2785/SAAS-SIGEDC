@@ -7,9 +7,36 @@ $filters = $filters ?? [];
 $statusDistribution = $statusDistribution ?? [];
 $hotspots = $hotspots ?? [];
 $mapPoints = $mapPoints ?? [];
+$alerts = $alerts ?? [];
 $responseKpi = $responseKpi ?? [];
 $planconCoverage = $planconCoverage ?? [];
 $trendByDay = $trendByDay ?? [];
+
+$mapGeoPoints = [];
+foreach ($mapPoints as $point) {
+    $lat = is_numeric($point['latitude'] ?? null) ? (float) $point['latitude'] : null;
+    $lon = is_numeric($point['longitude'] ?? null) ? (float) $point['longitude'] : null;
+    if ($lat === null || $lon === null) {
+        continue;
+    }
+
+    $mapGeoPoints[] = [
+        'municipio' => (string) ($point['municipio_nome'] ?? 'N/A'),
+        'uf' => (string) ($point['uf_sigla_ref'] ?? ''),
+        'total' => (int) ($point['total_incidentes'] ?? 0),
+        'lat' => $lat,
+        'lon' => $lon,
+    ];
+}
+
+$latitudes = array_map(static fn(array $p): float => $p['lat'], $mapGeoPoints);
+$longitudes = array_map(static fn(array $p): float => $p['lon'], $mapGeoPoints);
+$minLat = $latitudes !== [] ? min($latitudes) : -35.0;
+$maxLat = $latitudes !== [] ? max($latitudes) : 5.0;
+$minLon = $longitudes !== [] ? min($longitudes) : -74.0;
+$maxLon = $longitudes !== [] ? max($longitudes) : -34.0;
+$latRange = max($maxLat - $minLat, 0.000001);
+$lonRange = max($maxLon - $minLon, 0.000001);
 ?>
 <section class="hero">
     <h1>Inteligencia Operacional</h1>
@@ -48,9 +75,46 @@ $trendByDay = $trendByDay ?? [];
         <p class="kpi-value"><?= e((string) (isset($responseKpi['media_minutos_primeiro_briefing']) ? number_format((float) $responseKpi['media_minutos_primeiro_briefing'], 1, ',', '.') : '0')) ?></p>
     </article>
     <article class="card kpi-card">
+        <h2>Sem briefing</h2>
+        <p class="kpi-value"><?= e((string) ($responseKpi['incidentes_sem_briefing'] ?? 0)) ?></p>
+    </article>
+    <article class="card kpi-card">
         <h2>PLANCON ativos</h2>
         <p class="kpi-value"><?= e((string) ($planconCoverage['total_plancons_ativos'] ?? 0)) ?></p>
     </article>
+</section>
+
+<section class="card table-card mt-1">
+    <h2>Alertas operacionais ativos</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>Nivel</th>
+                <th>Codigo</th>
+                <th>Mensagem</th>
+                <th>Incidente</th>
+                <th>Gerado em</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($alerts as $alert): ?>
+                <tr>
+                    <td><?= e((string) ($alert['nivel_alerta'] ?? '-')) ?></td>
+                    <td><?= e((string) ($alert['alerta_codigo'] ?? '-')) ?></td>
+                    <td><?= e((string) ($alert['mensagem_alerta'] ?? '-')) ?></td>
+                    <td><?= e((string) ($alert['numero_ocorrencia'] ?? '-')) ?></td>
+                    <td><?= e((string) ($alert['gerado_em'] ?? '-')) ?></td>
+                </tr>
+            <?php endforeach; ?>
+            <?php if ($alerts === []): ?>
+                <tr>
+                    <td colspan="5" class="muted">Nenhum alerta ativo no escopo atual.</td>
+                </tr>
+            <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
 </section>
 
 <section class="grid grid-2 mt-1">
@@ -109,6 +173,33 @@ $trendByDay = $trendByDay ?? [];
             </table>
         </div>
     </article>
+</section>
+
+<section class="card mt-1">
+    <h2>Mapa sintetico de incidentes</h2>
+    <?php if ($mapGeoPoints === []): ?>
+        <p class="muted">Sem coordenadas geograficas validas para desenhar o mapa sintetico.</p>
+    <?php else: ?>
+        <svg viewBox="0 0 1000 380" width="100%" height="380" role="img" aria-label="Mapa sintetico de pontos operacionais">
+            <rect x="0" y="0" width="1000" height="380" fill="#f6f8fb"></rect>
+            <?php foreach ($mapGeoPoints as $point): ?>
+                <?php
+                $x = 40 + (($point['lon'] - $minLon) / $lonRange) * 920;
+                $y = 20 + (($maxLat - $point['lat']) / $latRange) * 320;
+                $radius = 4 + min(10, (float) $point['total']);
+                $label = $point['municipio'] . '/' . $point['uf'] . ' (' . $point['total'] . ')';
+                ?>
+                <circle cx="<?= e((string) number_format($x, 2, '.', '')) ?>"
+                        cy="<?= e((string) number_format($y, 2, '.', '')) ?>"
+                        r="<?= e((string) number_format($radius, 2, '.', '')) ?>"
+                        fill="#1f6aa5"
+                        opacity="0.75">
+                    <title><?= e($label) ?></title>
+                </circle>
+            <?php endforeach; ?>
+        </svg>
+        <p class="muted">Visual sintetico proporcional por latitude/longitude dos municipios com incidente.</p>
+    <?php endif; ?>
 </section>
 
 <section class="card table-card mt-1">

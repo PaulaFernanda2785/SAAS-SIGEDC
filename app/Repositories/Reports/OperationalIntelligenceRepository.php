@@ -109,6 +109,8 @@ final class OperationalIntelligenceRepository
         $statement = $this->pdo()->prepare(
             "SELECT
                 COUNT(*) AS total_incidentes,
+                SUM(CASE WHEN b.primeiro_briefing_em IS NULL THEN 1 ELSE 0 END) AS incidentes_sem_briefing,
+                SUM(CASE WHEN b.primeiro_briefing_em IS NOT NULL THEN 1 ELSE 0 END) AS incidentes_com_briefing,
                 AVG(TIMESTAMPDIFF(MINUTE, i.data_hora_abertura, b.primeiro_briefing_em)) AS media_minutos_primeiro_briefing,
                 MIN(TIMESTAMPDIFF(MINUTE, i.data_hora_abertura, b.primeiro_briefing_em)) AS menor_tempo_briefing,
                 MAX(TIMESTAMPDIFF(MINUTE, i.data_hora_abertura, b.primeiro_briefing_em)) AS maior_tempo_briefing
@@ -125,6 +127,8 @@ final class OperationalIntelligenceRepository
 
         return [
             'total_incidentes' => (int) ($row['total_incidentes'] ?? 0),
+            'incidentes_sem_briefing' => (int) ($row['incidentes_sem_briefing'] ?? 0),
+            'incidentes_com_briefing' => (int) ($row['incidentes_com_briefing'] ?? 0),
             'media_minutos_primeiro_briefing' => isset($row['media_minutos_primeiro_briefing']) ? (float) $row['media_minutos_primeiro_briefing'] : null,
             'menor_tempo_briefing' => isset($row['menor_tempo_briefing']) ? (int) $row['menor_tempo_briefing'] : null,
             'maior_tempo_briefing' => isset($row['maior_tempo_briefing']) ? (int) $row['maior_tempo_briefing'] : null,

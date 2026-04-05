@@ -176,6 +176,59 @@ final class OperationalDocumentService
         }
     }
 
+    public function download(array $auth, int $attachmentId, Request $request): array
+    {
+        $profiles = is_array($auth['perfis'] ?? null) ? $auth['perfis'] : [];
+        $policy = $this->policy ?? new OperationalPolicy();
+        if (!$policy->canDownloadDocuments($profiles)) {
+            return ['ok' => false, 'status' => 403, 'message' => 'Seu perfil nao possui permissao para baixar documentos.'];
+        }
+
+        $scopeService = $this->scopeService ?? new ScopeService();
+        if (!$scopeService->hasValidContext($auth)) {
+            return ['ok' => false, 'status' => 403, 'message' => 'Contexto institucional invalido para download.'];
+        }
+
+        if ($attachmentId < 1) {
+            return ['ok' => false, 'status' => 422, 'message' => 'Anexo informado e invalido para download.'];
+        }
+
+        $scope = $scopeService->scopeFilter($auth);
+        $repository = $this->documentRepository ?? new DocumentRepository();
+        $attachment = $repository->attachmentById($scope, $attachmentId);
+        if ($attachment === null) {
+            $this->auditDownload($auth, $request, $attachmentId, 'NEGADO', 'anexo_nao_encontrado_ou_fora_de_escopo');
+            return ['ok' => false, 'status' => 404, 'message' => 'Anexo nao encontrado no escopo institucional ativo.'];
+        }
+
+        $visibility = strtoupper((string) ($attachment['visibilidade'] ?? 'PRIVADO'));
+        $ownerId = (int) ($attachment['usuario_envio_id'] ?? 0);
+        $currentUserId = (int) ($auth['usuario_id'] ?? 0);
+        $isOwner = $ownerId > 0 && $currentUserId > 0 && $ownerId === $currentUserId;
+        $canReadOtherPrivate = $policy->canReadPrivateDocumentsFromOthers($profiles);
+
+        if ($visibility === 'PRIVADO' && !$isOwner && !$canReadOtherPrivate) {
+            $this->auditDownload($auth, $request, $attachmentId, 'NEGADO', 'arquivo_privado_sem_permissao');
+            return ['ok' => false, 'status' => 403, 'message' => 'Voce nao possui permissao para baixar este anexo privado.'];
+        }
+
+        $resolvedPath = $this->safeAttachmentAbsolutePath((string) ($attachment['arquivo_caminho'] ?? ''));
+        if ($resolvedPath === null || !is_file($resolvedPath) || !is_readable($resolvedPath)) {
+            $this->auditDownload($auth, $request, $attachmentId, 'FALHA', 'arquivo_fisico_nao_encontrado');
+            return ['ok' => false, 'status' => 404, 'message' => 'Arquivo fisico do anexo nao foi encontrado no storage.'];
+        }
+
+        $this->auditDownload($auth, $request, $attachmentId, 'SUCESSO', 'download_permitido');
+
+        return [
+            'ok' => true,
+            'status' => 200,
+            'file_path' => $resolvedPath,
+            'download_name' => (string) ($attachment['arquivo_nome'] ?? ('anexo-' . $attachmentId)),
+            'mime_type' => (string) ($attachment['arquivo_mime'] ?? 'application/octet-stream'),
+        ];
+    }
+
     private function resolveEntity(array $input): ?array
     {
         $type = $this->sanitizeEntityType($input['entidade_tipo'] ?? null);
@@ -252,5 +305,53 @@ final class OperationalDocumentService
     private function sanitizeEnum(string $value, array $allowed, string $default): string
     {
         return in_array($value, $allowed, true) ? $value : $default;
+    }
+
+    private function safeAttachmentAbsolutePath(string $relativePath): ?string
+    {
+        $normalizedRelative = trim(str_replace('\\', '/', $relativePath), '/');
+        if ($normalizedRelative === '') {
+            return null;
+        }
+
+        $absolute = storage_path($normalizedRelative);
+        $resolved = realpath($absolute);
+        $attachmentsRoot = realpath(storage_path('attachments'));
+        if ($resolved === false || $attachmentsRoot === false) {
+            return null;
+        }
+
+        $resolvedCheck = DIRECTORY_SEPARATOR === '\\' ? strtolower($resolved) : $resolved;
+        $rootCheck = DIRECTORY_SEPARATOR === '\\' ? strtolower($attachmentsRoot) : $attachmentsRoot;
+        if (!str_starts_with($resolvedCheck, $rootCheck . DIRECTORY_SEPARATOR) && $resolvedCheck !== $rootCheck) {
+            return null;
+        }
+
+        return $resolved;
+    }
+
+    private function auditDownload(
+        array $auth,
+        Request $request,
+        int $attachmentId,
+        string $result,
+        string $reason
+    ): void {
+        ($this->auditService ?? new AuditService())->log([
+            'conta_id' => $auth['conta_id'] ?? null,
+            'orgao_id' => $auth['orgao_id'] ?? null,
+            'unidade_id' => $auth['unidade_id'] ?? null,
+            'usuario_id' => $auth['usuario_id'] ?? null,
+            'modulo_codigo' => 'DOCUMENTS',
+            'acao' => 'DOCUMENT_DOWNLOAD',
+            'resultado' => $result,
+            'entidade_tipo' => 'anexos',
+            'entidade_id' => $attachmentId > 0 ? $attachmentId : null,
+            'detalhes' => [
+                'reason' => $reason,
+            ],
+            'ip_address' => $request->ipAddress(),
+            'user_agent' => $request->userAgent(),
+        ]);
     }
 }

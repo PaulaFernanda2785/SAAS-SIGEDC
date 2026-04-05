@@ -48,7 +48,7 @@ final class DocumentRepository
     {
         $where = [];
         $params = [];
-        $this->applyScopeWhere('a', $scope, $where, $params);
+        $this->applyScopeWhere('a', $scope, $where, $params, false);
 
         if ($entityType !== null) {
             $where[] = 'a.entidade_tipo = :entidade_tipo';
@@ -80,11 +80,42 @@ final class DocumentRepository
         return $statement->fetchAll();
     }
 
+    public function attachmentById(array $scope, int $attachmentId): ?array
+    {
+        $where = ['a.id = :attachment_id'];
+        $params = ['attachment_id' => $attachmentId];
+        $this->applyScopeWhere('a', $scope, $where, $params, false);
+        $whereSql = $this->whereClause($where);
+
+        $statement = $this->pdo()->prepare(
+            "SELECT
+                a.id,
+                a.conta_id,
+                a.orgao_id,
+                a.usuario_envio_id,
+                a.entidade_tipo,
+                a.entidade_id,
+                a.arquivo_nome,
+                a.arquivo_caminho,
+                a.arquivo_mime,
+                a.tamanho_bytes,
+                a.visibilidade,
+                a.created_at
+             FROM anexos a
+             {$whereSql}
+             LIMIT 1"
+        );
+        $statement->execute($params);
+
+        $row = $statement->fetch();
+        return is_array($row) ? $row : null;
+    }
+
     public function attachmentsByEntityType(array $scope): array
     {
         $where = [];
         $params = [];
-        $this->applyScopeWhere('a', $scope, $where, $params);
+        $this->applyScopeWhere('a', $scope, $where, $params, false);
         $whereSql = $this->whereClause($where);
 
         $statement = $this->pdo()->prepare(
@@ -225,7 +256,13 @@ final class DocumentRepository
         return ((int) $statement->fetchColumn()) > 0;
     }
 
-    private function applyScopeWhere(string $alias, array $scope, array &$where, array &$params): void
+    private function applyScopeWhere(
+        string $alias,
+        array $scope,
+        array &$where,
+        array &$params,
+        bool $withUnitColumn = true
+    ): void
     {
         $contaId = (int) ($scope['conta_id'] ?? 0);
         if ($contaId < 1) {
@@ -247,7 +284,7 @@ final class DocumentRepository
             $params['orgao_id'] = $orgaoId;
         }
 
-        if (($scope['restrict_to_unidade'] ?? false) === true) {
+        if ($withUnitColumn && ($scope['restrict_to_unidade'] ?? false) === true) {
             $unidadeId = (int) ($scope['unidade_id'] ?? 0);
             if ($unidadeId < 1) {
                 $where[] = '1 = 0';

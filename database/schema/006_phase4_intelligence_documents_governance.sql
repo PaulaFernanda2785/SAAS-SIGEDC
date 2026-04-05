@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS inteligencia_alertas_operacionais (
     CONSTRAINT fk_inteligencia_alertas_unidade FOREIGN KEY (unidade_id) REFERENCES unidades(id),
     CONSTRAINT fk_inteligencia_alertas_incidente FOREIGN KEY (incidente_id) REFERENCES incidentes(id),
     KEY idx_inteligencia_alertas_escopo_status (conta_id, orgao_id, unidade_id, status_alerta),
+    KEY idx_inteligencia_alertas_codigo_status (conta_id, orgao_id, unidade_id, alerta_codigo, status_alerta),
     KEY idx_inteligencia_alertas_incidente (incidente_id, nivel_alerta),
     KEY idx_inteligencia_alertas_data (gerado_em)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

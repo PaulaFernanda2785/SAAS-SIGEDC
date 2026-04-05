@@ -28,6 +28,7 @@ final class IntelligenceController
             'hotspots' => $data['hotspots'],
             'mapPoints' => $data['map_points'],
             'responseKpi' => $data['response_kpi'],
+            'alerts' => $data['alerts'],
             'planconCoverage' => $data['plancon_coverage'],
             'trendByDay' => $data['trend_by_day'],
         ], 'operational');

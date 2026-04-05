@@ -36,6 +36,7 @@ INSERT INTO permissoes (codigo_permissao, descricao)
 VALUES
     ('operational.intelligence.view', 'Permite visualizar inteligencia operacional'),
     ('operational.documents.view', 'Permite visualizar documentos operacionais'),
+    ('operational.documents.download', 'Permite baixar documentos operacionais'),
     ('operational.documents.upload', 'Permite anexar documentos operacionais'),
     ('operational.governance.view', 'Permite visualizar governanca operacional'),
     ('operational.governance.term.accept', 'Permite registrar aceite de termo operacional'),
@@ -49,6 +50,7 @@ FROM perfis p
 INNER JOIN permissoes pe ON pe.codigo_permissao IN (
     'operational.intelligence.view',
     'operational.documents.view',
+    'operational.documents.download',
     'operational.reports.advanced'
 )
 WHERE p.nome_perfil IN ('GESTOR', 'COORDENADOR', 'ANALISTA', 'OPERADOR', 'LEITOR')

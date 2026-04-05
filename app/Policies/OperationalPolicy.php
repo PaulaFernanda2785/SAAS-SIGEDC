@@ -123,6 +123,20 @@ final class OperationalPolicy
         ]);
     }
 
+    public function canDownloadDocuments(array $profiles): bool
+    {
+        return $this->canAccessDocuments($profiles);
+    }
+
+    public function canReadPrivateDocumentsFromOthers(array $profiles): bool
+    {
+        return $this->hasAnyProfile($profiles, [
+            UserProfile::GESTOR,
+            UserProfile::COORDENADOR,
+            UserProfile::ANALISTA,
+        ]);
+    }
+
     public function canAccessGovernance(array $profiles): bool
     {
         return $this->hasAnyProfile($profiles, [

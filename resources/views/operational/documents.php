@@ -144,6 +144,7 @@ $planconRiskOptions = $planconRiskOptions ?? [];
                 <th>Visibilidade</th>
                 <th>Enviado por</th>
                 <th>Data</th>
+                <th>Acoes</th>
             </tr>
             </thead>
             <tbody>
@@ -160,14 +161,18 @@ $planconRiskOptions = $planconRiskOptions ?? [];
                     <td><?= e((string) ($row['visibilidade'] ?? '')) ?></td>
                     <td><?= e((string) ($row['enviado_por'] ?? '-')) ?></td>
                     <td><?= e((string) ($row['created_at'] ?? '')) ?></td>
+                    <td>
+                        <a href="<?= e(url('/operational/documentos/download?anexo_id=' . (string) ($row['id'] ?? '0'))) ?>">Baixar</a>
+                    </td>
                 </tr>
             <?php endforeach; ?>
             <?php if ($attachments === []): ?>
                 <tr>
-                    <td colspan="8" class="muted">Nenhum anexo encontrado para o escopo/filtro atual.</td>
+                    <td colspan="9" class="muted">Nenhum anexo encontrado para o escopo/filtro atual.</td>
                 </tr>
             <?php endif; ?>
             </tbody>
         </table>
     </div>
+    <p class="muted">Anexos privados podem ser baixados apenas pelo autor ou perfis com permissao ampliada.</p>
 </section>

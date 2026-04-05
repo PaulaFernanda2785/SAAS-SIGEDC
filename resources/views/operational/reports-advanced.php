@@ -8,6 +8,7 @@ $trend = $trend ?? [];
 $hotspots = $hotspots ?? [];
 $auditFrequency = $auditFrequency ?? [];
 $documentsByEntity = $documentsByEntity ?? [];
+$activeAlerts = $activeAlerts ?? [];
 $recentExecutions = $recentExecutions ?? [];
 ?>
 <section class="hero">
@@ -49,6 +50,10 @@ $recentExecutions = $recentExecutions ?? [];
     <article class="card kpi-card">
         <h2>Acoes auditadas</h2>
         <p class="kpi-value"><?= e((string) count($auditFrequency)) ?></p>
+    </article>
+    <article class="card kpi-card">
+        <h2>Alertas ativos</h2>
+        <p class="kpi-value"><?= e((string) count($activeAlerts)) ?></p>
     </article>
 </section>
 
@@ -170,6 +175,39 @@ $recentExecutions = $recentExecutions ?? [];
             </table>
         </div>
     </article>
+</section>
+
+<section class="card table-card mt-1">
+    <h2>Alertas operacionais ativos</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>Nivel</th>
+                <th>Codigo</th>
+                <th>Mensagem</th>
+                <th>Incidente</th>
+                <th>Gerado em</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($activeAlerts as $alert): ?>
+                <tr>
+                    <td><?= e((string) ($alert['nivel_alerta'] ?? '-')) ?></td>
+                    <td><?= e((string) ($alert['alerta_codigo'] ?? '-')) ?></td>
+                    <td><?= e((string) ($alert['mensagem_alerta'] ?? '-')) ?></td>
+                    <td><?= e((string) ($alert['numero_ocorrencia'] ?? '-')) ?></td>
+                    <td><?= e((string) ($alert['gerado_em'] ?? '-')) ?></td>
+                </tr>
+            <?php endforeach; ?>
+            <?php if ($activeAlerts === []): ?>
+                <tr>
+                    <td colspan="5" class="muted">Sem alertas operacionais ativos no periodo/escopo informado.</td>
+                </tr>
+            <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
 </section>
 
 <section class="card table-card mt-1">

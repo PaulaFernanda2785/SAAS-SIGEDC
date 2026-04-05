@@ -49,6 +49,7 @@ $router->get('/operational/relatorios/avancado', [ReportController::class, 'adva
 $router->get('/operational/inteligencia', [IntelligenceController::class, 'index'], $intelligenceMiddleware);
 
 $router->get('/operational/documentos', [DocumentController::class, 'index'], $documentsMiddleware);
+$router->get('/operational/documentos/download', [DocumentController::class, 'download'], $documentsMiddleware);
 $router->post('/operational/documentos/upload', [DocumentController::class, 'upload'], ['authenticate', 'area.operational', 'operational.access', 'documents.access', 'csrf']);
 
 $router->get('/operational/governanca', [GovernanceController::class, 'index'], $governanceMiddleware);
