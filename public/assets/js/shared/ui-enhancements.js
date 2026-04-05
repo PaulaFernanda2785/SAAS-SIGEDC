@@ -182,7 +182,7 @@
 
   const initRevealEffects = () => {
     const targets = document.querySelectorAll(
-      '.landing-hero, .landing-section, .landing-cta-strip, .landing-card, .landing-feature, .table-card, .auth-card'
+      '.landing-hero-inner, .landing-section-header, .landing-grid-3, .landing-grid-2, .landing-metrics, .landing-cta-strip, .table-card, .auth-card'
     );
 
     if (targets.length === 0) {
@@ -205,14 +205,24 @@
         }
 
         child.classList.add('reveal-cascade-item');
-        child.style.setProperty('--reveal-delay', `${Math.min(order * 0.18, 1.3).toFixed(2)}s`);
+        if (!child.style.getPropertyValue('--reveal-delay')) {
+          child.style.setProperty('--reveal-delay', `${Math.min(order * 0.16, 1.2).toFixed(2)}s`);
+        }
         order += 1;
       });
     });
 
+    const activateReveal = (element) => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          element.classList.add('is-visible');
+        });
+      });
+    };
+
     if (!('IntersectionObserver' in window)) {
       targets.forEach((target) => {
-        target.classList.add('is-visible');
+        activateReveal(target);
       });
       return;
     }
@@ -224,13 +234,13 @@
             return;
           }
 
-          entry.target.classList.add('is-visible');
+          activateReveal(entry.target);
           currentObserver.unobserve(entry.target);
         });
       },
       {
-        threshold: 0.12,
-        rootMargin: '0px 0px -8% 0px',
+        threshold: 0.08,
+        rootMargin: '0px 0px -6% 0px',
       }
     );
 
